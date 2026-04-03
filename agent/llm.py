@@ -10,10 +10,19 @@ async def ask_tick_model(prompt: str) -> str:
     try:
         response = await litellm.acompletion(
             model="ollama/gemma4:e2b",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=200,
-            temperature=0.2,
-            api_base=OLLAMA_BASE_URL,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a silent background coding agent. Respond with exactly one line: either 'SLEEP' or 'ACTION: <what to do>'. Nothing else."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            max_tokens=50,
+            temperature=0.1,
+            api_base="http://localhost:11434",
         )
         console.print(f"[dim]raw litellm response: {response}[/dim]")
         text = response.choices[0].message.content

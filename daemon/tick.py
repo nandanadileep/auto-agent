@@ -21,21 +21,7 @@ async def tick():
             autonomy = get_autonomy_level()
             console.print(f"[dim]autonomy: {autonomy}[/dim]")
 
-            prompt = f"""You are KAIROS, a silent background coding agent.
-
-Current repo state:
-{ctx}
-
-Autonomy level: {autonomy}
-- high: user is away, act freely
-- medium: user stepped away briefly, notify but no public actions
-- low: user is present, surface findings quietly in terminal only
-
-Rules:
-- If there is something specific and useful to tell the developer, respond with: ACTION: <what to do>
-- If there is nothing useful to say, respond with: SLEEP
-- Never narrate. Never say you checked something. Never explain your reasoning.
-- SLEEP is always right when in doubt."""
+            prompt = f"Repo state: {ctx}\nAutonomy: {autonomy}\nRespond SLEEP or ACTION: <instruction>."
 
             response = await ask_tick_model(prompt)
             console.print(f"[dim]model response: {response}[/dim]")
