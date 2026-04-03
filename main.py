@@ -4,26 +4,26 @@ import sys
 from rich.console import Console
 
 console = Console()
-scheduler = None
+
+
+async def run():
+    from daemon.scheduler import start_scheduler
+
+    scheduler = start_scheduler()
+    console.print("[dim]KAIROS running. Press Ctrl+C to stop.[/dim]")
+    try:
+        while True:
+            await asyncio.sleep(60)
+    finally:
+        scheduler.shutdown()
+
 
 if __name__ == "__main__":
     try:
-        from daemon.scheduler import start_scheduler
-
         console.print("[dim]KAIROS starting...[/dim]")
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        scheduler = start_scheduler()
-        console.print("[dim]KAIROS running. Press Ctrl+C to stop.[/dim]")
-        loop.run_forever()
-
+        asyncio.run(run())
     except KeyboardInterrupt:
-        if scheduler:
-            scheduler.shutdown()
         console.print("[dim]KAIROS stopped.[/dim]")
-
     except Exception as e:
         console.print(f"[red]KAIROS error:[/red] {e}")
-        if scheduler:
-            scheduler.shutdown()
         sys.exit(1)
