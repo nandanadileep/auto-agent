@@ -13,7 +13,9 @@ if __name__ == "__main__":
         console.print("[dim]KAIROS starting...[/dim]")
         scheduler = start_scheduler()
         console.print("[dim]KAIROS running. Press Ctrl+C to stop.[/dim]")
-        asyncio.get_event_loop().run_forever()
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_forever()
 
     except KeyboardInterrupt:
         if scheduler:
