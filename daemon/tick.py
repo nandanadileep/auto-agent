@@ -17,7 +17,9 @@ async def tick():
     try:
         async with asyncio.timeout(config.TICK_TIMEOUT_SECONDS):
             ctx = await build_context()
+            console.print("[dim]context built[/dim]")
             autonomy = get_autonomy_level()
+            console.print(f"[dim]autonomy: {autonomy}[/dim]")
 
             prompt = f"""You are KAIROS, a silent background coding agent.
 
@@ -36,6 +38,7 @@ Rules:
 - SLEEP is always right when in doubt."""
 
             response = await ask_tick_model(prompt)
+            console.print(f"[dim]model response: {response}[/dim]")
 
             if response.startswith("SLEEP"):
                 return
