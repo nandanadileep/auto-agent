@@ -40,7 +40,7 @@ Rules:
             response = await ask_tick_model(prompt)
             console.print(f"[dim]model response: {response}[/dim]")
 
-            if response.startswith("SLEEP"):
+            if not response or response.startswith("SLEEP"):
                 return
 
             if response.startswith("ACTION:"):

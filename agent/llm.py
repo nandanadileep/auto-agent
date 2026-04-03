@@ -1,7 +1,9 @@
 import litellm
+from rich.console import Console
 from config import GROQ_API_KEY, OLLAMA_BASE_URL
 
 litellm.api_base = OLLAMA_BASE_URL
+console = Console()
 
 
 async def ask_tick_model(prompt: str) -> str:
@@ -13,10 +15,11 @@ async def ask_tick_model(prompt: str) -> str:
             temperature=0.2,
             api_base=OLLAMA_BASE_URL,
         )
-        return response.choices[0].message.content.strip()
+        console.print(f"[dim]raw litellm response: {response}[/dim]")
+        text = response.choices[0].message.content
+        return text.strip() if text else "SLEEP"
     except Exception as e:
-        from rich.console import Console
-        Console().print(f"[red][kairos] tick model error:[/red] {e}")
+        console.print(f"[red][kairos] tick model error:[/red] {e}")
         return "SLEEP"
 
 
@@ -31,6 +34,5 @@ async def ask_dream_model(prompt: str) -> str:
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
-        from rich.console import Console
-        Console().print(f"[red][kairos] dream model error:[/red] {e}")
+        console.print(f"[red][kairos] dream model error:[/red] {e}")
         return ""
