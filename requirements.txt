@@ -1,0 +1,14 @@
+apscheduler
+litellm
+gitpython
+PyGithub
+watchfiles
+psutil
+rich
+plyer
+sqlite-utils
+tiktoken
+python-dotenv
+fastapi
+uvicorn
+httpx
