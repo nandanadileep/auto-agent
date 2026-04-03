@@ -11,10 +11,10 @@ if __name__ == "__main__":
         from daemon.scheduler import start_scheduler
 
         console.print("[dim]KAIROS starting...[/dim]")
-        scheduler = start_scheduler()
-        console.print("[dim]KAIROS running. Press Ctrl+C to stop.[/dim]")
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
+        scheduler = start_scheduler()
+        console.print("[dim]KAIROS running. Press Ctrl+C to stop.[/dim]")
         loop.run_forever()
 
     except KeyboardInterrupt:
