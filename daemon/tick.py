@@ -13,6 +13,7 @@ console = Console()
 
 
 async def tick():
+    console.print("[dim]tick firing...[/dim]")
     try:
         async with asyncio.timeout(config.TICK_TIMEOUT_SECONDS):
             ctx = await build_context()
@@ -50,6 +51,9 @@ Rules:
                     print_brief(instruction)
 
     except asyncio.TimeoutError:
+        console.print("[yellow][kairos] tick timed out[/yellow]")
         return
     except Exception as e:
+        import traceback
         console.print(f"[red][kairos] tick error:[/red] {e}")
+        console.print(f"[red]{traceback.format_exc()}[/red]")
