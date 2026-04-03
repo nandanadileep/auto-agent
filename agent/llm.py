@@ -7,7 +7,7 @@ litellm.api_base = OLLAMA_BASE_URL
 async def ask_tick_model(prompt: str) -> str:
     try:
         response = await litellm.acompletion(
-            model="ollama/gemma4:2b",
+            model="ollama/gemma4:e2b",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=200,
             temperature=0.2,
