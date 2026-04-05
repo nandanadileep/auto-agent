@@ -13,18 +13,14 @@ console = Console()
 
 
 async def tick():
-    console.print("[dim]tick firing...[/dim]")
     try:
         async with asyncio.timeout(config.TICK_TIMEOUT_SECONDS):
             ctx = await build_context()
-            console.print("[dim]context built[/dim]")
             autonomy = get_autonomy_level()
-            console.print(f"[dim]autonomy: {autonomy}[/dim]")
 
             prompt = f"Repo state: {ctx}\nAutonomy: {autonomy}\nRespond SLEEP or ACTION: <instruction>."
 
             response = await ask_tick_model(prompt)
-            console.print(f"[dim]model response: {response}[/dim]")
 
             if not response or response.startswith("SLEEP"):
                 return
