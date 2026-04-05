@@ -1,15 +1,14 @@
 import litellm
 from rich.console import Console
-from config import GROQ_API_KEY, OLLAMA_BASE_URL
+from config import GROQ_API_KEY
 
-litellm.api_base = OLLAMA_BASE_URL
 console = Console()
 
 
 async def ask_tick_model(prompt: str) -> str:
     try:
         response = await litellm.acompletion(
-            model="ollama/gemma4:e2b",
+            model="groq/llama-3.3-70b-versatile",
             messages=[
                 {
                     "role": "system",
@@ -22,13 +21,11 @@ async def ask_tick_model(prompt: str) -> str:
             ],
             max_tokens=50,
             temperature=0.1,
-            api_base="http://localhost:11434",
+            api_key=GROQ_API_KEY,
         )
-        console.print(f"[dim]raw litellm response: {response}[/dim]")
         text = response.choices[0].message.content
         return text.strip() if text else "SLEEP"
     except Exception as e:
-        console.print(f"[red][kairos] tick model error:[/red] {e}")
         return "SLEEP"
 
 
