@@ -39,5 +39,5 @@ def get_todays_actions() -> list:
         "SELECT * FROM actions WHERE DATE(timestamp) = ? ORDER BY timestamp ASC",
         [today]
     ))
-    columns = [col[0] for col in db.execute("PRAGMA table_info(actions)").fetchall()]
+    columns = [col[1] for col in db.execute("PRAGMA table_info(actions)").fetchall()]
     return [dict(zip(columns, row)) for row in rows]
