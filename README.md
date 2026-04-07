@@ -1,20 +1,21 @@
 # KAIROS
 
-Open-source autonomous background coding agent. Runs silently while you work, watches your repo, and surfaces useful nudges — TODOs you forgot, stale PRs, missing env keys — without interrupting your flow.
-
-At midnight it consolidates everything it observed into a rolling `MEMORY.md` so it gets smarter over time.
+Open-source autonomous background coding agent — inspired by Anthropic's unreleased KAIROS, built with Gemma 4 and Groq.
 
 ---
 
 ## What it does
 
-- Ticks every 5 minutes — reads your git history, modified files, TODOs/FIXMEs/HACKs
-- Detects if you're at your desk (Mac idle time) and adjusts how loudly it speaks
-- Sends a desktop notification when you're away, a quiet terminal line when you're present
-- Never acts on code — observation and nudges only
-- Nightly autodream: consolidates daily observations into persistent memory via Groq
+- Watches your repo every 5 minutes and surfaces TODOs, stale PRs, missing env keys, and recent code changes
+- Detects whether you're at your desk and decides how loudly to speak — desktop notification if you're away, a quiet terminal line if you're present
+- Runs a nightly memory pass that consolidates everything it observed into a rolling `MEMORY.md` so context persists across sessions
+- Never touches your code — observation and nudges only
 
-## Quick start
+## How it works
+
+Every 5 minutes KAIROS wakes up, builds a snapshot of your repo (git history, modified files, TODOs, open PRs, memory), checks how idle your machine is to determine autonomy level, and sends that context to Groq. The model responds with either `SLEEP` (nothing useful to say) or `ACTION: <instruction>`. If it's an action, KAIROS logs it, deduplicates it against today's history, and delivers it — as a desktop notification if you're away, or a single dim line in your terminal if you're present. At midnight it runs an autodream: the day's observations get merged into `MEMORY.md` by the LLM, keeping the file under 200 lines.
+
+## Quickstart
 
 ```bash
 git clone https://github.com/nandanadileep/Kairos-mini.git
@@ -27,50 +28,30 @@ python3 main.py
 
 ## Configuration
 
-Copy `.env.example` to `.env` and fill in:
+| Key | Required | Description |
+|-----|----------|-------------|
+| `GITHUB_TOKEN` | Yes | Personal access token with `repo` scope |
+| `GITHUB_REPO` | Yes | Repo to watch, e.g. `username/repo` |
+| `GROQ_API_KEY` | Yes | From [console.groq.com](https://console.groq.com) — free tier works |
+| `KAIROS_REPO_PATH` | Yes | Absolute path to the local repo, e.g. `/Users/you/projects/myrepo` |
+| `OLLAMA_BASE_URL` | No | Defaults to `http://localhost:11434` |
 
-| Key | Description |
-|-----|-------------|
-| `GITHUB_TOKEN` | Personal access token with `repo` scope |
-| `GITHUB_REPO` | Repo to watch, e.g. `username/repo` |
-| `GROQ_API_KEY` | From [console.groq.com](https://console.groq.com) |
-| `KAIROS_REPO_PATH` | Absolute path to the local repo, e.g. `/Users/you/projects/myrepo` |
-| `OLLAMA_BASE_URL` | Optional, defaults to `http://localhost:11434` |
+## Stack
 
-## Project structure
+| Layer | Technology |
+|-------|-----------|
+| Language | Python 3.10+ |
+| Scheduler | APScheduler (AsyncIO) |
+| LLM | Groq — `llama-3.3-70b-versatile` |
+| Local models | Ollama — `gemma4:e2b` |
+| GitHub | PyGithub |
+| Terminal output | rich |
+| Desktop notifications | plyer |
 
-```
-kairos/
-├── daemon/
-│   ├── tick.py          # main tick cycle (runs every 5 min)
-│   └── scheduler.py     # APScheduler setup
-├── memory/
-│   ├── daily_log.py     # append observations during the day
-│   ├── dream.py         # nightly consolidation into MEMORY.md
-│   └── memory_md.py     # read/write MEMORY.md
-├── watchers/
-│   ├── github.py        # open PRs, recent commits
-│   └── filesystem.py    # file change watcher (coming soon)
-├── agent/
-│   ├── llm.py           # Groq calls for tick and dream
-│   └── tools.py         # tool stubs
-├── presence.py          # Mac idle time → autonomy level
-├── actions.py           # notify, print_brief, post_pr_comment
-├── context.py           # builds full repo context dict
-├── state.py             # SQLite action log
-├── config.py            # env + constants
-└── main.py              # entrypoint
-```
+## Inspired by
 
-## Models
+Architecture inspired by the KAIROS agent described in Anthropic's Claude Code behavioral specification — a silent background daemon that observes, remembers, and nudges without interrupting flow.
 
-| Role | Model |
-|------|-------|
-| Tick (every 5 min) | `groq/llama-3.3-70b-versatile` |
-| Autodream (midnight) | `groq/llama-3.3-70b-versatile` |
+## License
 
-## Requirements
-
-- Python 3.10+
-- Mac (presence detection uses `ioreg`)
-- A Groq API key (free tier works)
+MIT — see [LICENSE](LICENSE)
