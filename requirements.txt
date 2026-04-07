@@ -6,6 +6,7 @@ watchfiles
 psutil
 rich
 plyer
+pyobjus
 sqlite-utils
 tiktoken
 python-dotenv
