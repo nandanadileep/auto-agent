@@ -55,8 +55,9 @@ def _filesystem_section() -> dict:
                     modified_py.append(str(path.relative_to(root)))
 
                 for i, line in enumerate(path.read_text(errors="ignore").splitlines(), start=1):
-                    upper = line.upper()
-                    if any(tag in upper for tag in ("TODO", "FIXME", "HACK")):
+                    stripped = line.strip()
+                    upper = stripped.upper()
+                    if stripped.startswith("#") and any(upper.startswith(f"# {tag}") or upper.startswith(f"#{tag}") for tag in ("TODO", "FIXME", "HACK")):
                         todos.append({
                             "file": str(path.relative_to(root)),
                             "line": i,
