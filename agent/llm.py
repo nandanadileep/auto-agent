@@ -1,6 +1,10 @@
+import logging
 import litellm
 from rich.console import Console
 from config import GROQ_API_KEY, GOOGLE_AI_STUDIO_KEY
+
+litellm.suppress_debug_info = True
+logging.getLogger("LiteLLM").setLevel(logging.ERROR)
 
 console = Console()
 
@@ -26,6 +30,7 @@ async def ask_tick_model(prompt: str) -> str:
         text = response.choices[0].message.content
         return text.strip() if text else "SLEEP"
     except Exception as e:
+        console.print(f"[red][kairos] tick model error:[/red] {e}")
         return "SLEEP"
 
 
