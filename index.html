@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KAIROS</title>
+  <title>auto-agent — silent background coding agent</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -401,7 +401,7 @@
   <div class="wrap">
 
     <nav>
-      <div class="nav-logo">KAIROS</div>
+      <div class="nav-logo">auto-agent</div>
       <div class="nav-links">
         <a href="#how-it-works">How it works</a>
         <a href="#setup">Setup</a>
@@ -413,7 +413,7 @@
     <div class="hero">
       <div class="badge">open source · autonomous · background agent</div>
       <h1>Your repo has a<br/><span class="grad">silent co-pilot</span></h1>
-      <p>KAIROS watches your codebase while you work. It finds TODOs, flags stale PRs, and posts comments — without interrupting your flow.</p>
+      <p>auto-agent watches your codebase while you work. It finds TODOs, flags stale PRs, and posts comments — without interrupting your flow.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="#setup">Get started</a>
         <a class="btn btn-ghost" href="https://github.com/nandanadileep/Kairos-mini" target="_blank">View on GitHub</a>
@@ -428,12 +428,12 @@
         </div>
         <div class="terminal-body">
           <div class="t-dim">$ python3 main.py</div>
-          <div class="t-dim">KAIROS starting...</div>
-          <div class="t-dim">KAIROS running. Press Ctrl+C to stop.</div>
+          <div class="t-dim">auto-agent starting...</div>
+          <div class="t-dim">auto-agent running. Press Ctrl+C to stop.</div>
           <div>&nbsp;</div>
-          <div><span class="t-dim">KAIROS</span> <span>3 unresolved TODOs in agent/tools.py</span></div>
-          <div><span class="t-dim">KAIROS</span> <span class="t-green">commented on PR #4 — stale for 6 days</span></div>
-          <div><span class="t-dim">KAIROS</span> <span class="t-accent">ACTION: add error handling to tools.py</span></div>
+          <div><span class="t-dim">auto-agent</span> <span>3 unresolved TODOs in agent/tools.py</span></div>
+          <div><span class="t-dim">auto-agent</span> <span class="t-green">commented on PR #4 — stale for 6 days</span></div>
+          <div><span class="t-dim">auto-agent</span> <span class="t-accent">ACTION: add error handling to tools.py</span></div>
         </div>
       </div>
     </div>
@@ -459,7 +459,7 @@
         <div class="feature">
           <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
           <h3>Autonomous PR comments</h3>
-          <p>Finds something relevant to an open PR? It posts a comment autonomously, prefixed with <code>KAIROS:</code>.</p>
+          <p>Finds something relevant to an open PR? It posts a comment autonomously, prefixed with <code>auto-agent:</code>.</p>
         </div>
         <div class="feature">
           <div class="feature-icon"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
@@ -488,7 +488,7 @@
       <p class="section-sub">Every minute: build context → detect presence → ask the model → act or sleep.</p>
       <div class="arch-wrap" id="arch">
         <div class="arch-inner" id="arch-inner">
-          <img src="architecture.png" alt="KAIROS architecture diagram" draggable="false" />
+          <img src="architecture.png" alt="auto-agent architecture diagram" draggable="false" />
         </div>
         <div class="arch-hint">scroll to zoom · drag to pan</div>
       </div>
@@ -526,7 +526,7 @@ pip install -r requirements.txt</pre>
                   <tr><td>GITHUB_REPO</td><td><span class="req">required</span></td><td>Repo to watch, e.g. <code>username/repo</code></td></tr>
                   <tr><td>GROQ_API_KEY</td><td><span class="req">required</span></td><td>From console.groq.com — free tier works</td></tr>
                   <tr><td>GOOGLE_AI_STUDIO_KEY</td><td><span class="req">required</span></td><td>From aistudio.google.com — for tick model</td></tr>
-                  <tr><td>KAIROS_REPO_PATH</td><td><span class="req">required</span></td><td>Absolute path to your local repo</td></tr>
+                  <tr><td>auto-agent_REPO_PATH</td><td><span class="req">required</span></td><td>Absolute path to your local repo</td></tr>
                   <tr><td>OLLAMA_BASE_URL</td><td><span class="opt">optional</span></td><td>Defaults to <code>http://localhost:11434</code></td></tr>
                 </tbody>
               </table>
@@ -538,7 +538,7 @@ pip install -r requirements.txt</pre>
           <div class="step-content">
             <h3>Run</h3>
             <pre>python3 main.py</pre>
-            <p>KAIROS starts silently. It prints a line only when it has something useful to say.</p>
+            <p>auto-agent starts silently. It prints a line only when it has something useful to say.</p>
           </div>
         </div>
       </div>
@@ -564,7 +564,7 @@ pip install -r requirements.txt</pre>
         <span class="tag">tiktoken</span>
       </div>
       <p style="margin-top:1.4rem;font-size:0.84rem;color:var(--muted);font-weight:300;">
-        Inspired by the KAIROS agent architecture described in Anthropic's Claude Code behavioral specification.
+        Inspired by the auto-agent agent architecture described in Anthropic's Claude Code behavioral specification.
       </p>
     </section>
 

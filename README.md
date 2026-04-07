@@ -1,4 +1,4 @@
-# KAIROS
+# auto-agent
 
 Open-source autonomous background coding agent — inspired by Anthropic's unreleased KAIROS, built with Gemma 4 and Groq.
 
@@ -13,7 +13,7 @@ Open-source autonomous background coding agent — inspired by Anthropic's unrel
 
 ## How it works
 
-Every 5 minutes KAIROS wakes up, builds a snapshot of your repo (git history, modified files, TODOs, open PRs, memory), checks how idle your machine is to determine autonomy level, and sends that context to Groq. The model responds with either `SLEEP` (nothing useful to say) or `ACTION: <instruction>`. If it's an action, KAIROS logs it, deduplicates it against today's history, and delivers it — as a desktop notification if you're away, or a single dim line in your terminal if you're present. At midnight it runs an autodream: the day's observations get merged into `MEMORY.md` by the LLM, keeping the file under 200 lines.
+Every 5 minutes auto-agent wakes up, builds a snapshot of your repo (git history, modified files, TODOs, open PRs, memory), checks how idle your machine is to determine autonomy level, and sends that context to Groq. The model responds with either `SLEEP` (nothing useful to say) or `ACTION: <instruction>`. If it's an action, auto-agent logs it, deduplicates it against today's history, and delivers it — as a desktop notification if you're away, or a single dim line in your terminal if you're present. At midnight it runs an autodream: the day's observations get merged into `MEMORY.md` by the LLM, keeping the file under 200 lines.
 
 ## Quickstart
 
@@ -33,7 +33,7 @@ python3 main.py
 | `GITHUB_TOKEN` | Yes | Personal access token with `repo` scope |
 | `GITHUB_REPO` | Yes | Repo to watch, e.g. `username/repo` |
 | `GROQ_API_KEY` | Yes | From [console.groq.com](https://console.groq.com) — free tier works |
-| `KAIROS_REPO_PATH` | Yes | Absolute path to the local repo, e.g. `/Users/you/projects/myrepo` |
+| `AGENT_REPO_PATH` | Yes | Absolute path to the local repo, e.g. `/Users/you/projects/myrepo` |
 | `OLLAMA_BASE_URL` | No | Defaults to `http://localhost:11434` |
 
 ## Stack

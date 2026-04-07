@@ -10,7 +10,7 @@ async def run():
     from daemon.scheduler import start_scheduler
 
     scheduler = start_scheduler()
-    console.print("[dim]KAIROS running. Press Ctrl+C to stop.[/dim]")
+    console.print("[dim]auto-agent running. Press Ctrl+C to stop.[/dim]")
     try:
         while True:
             await asyncio.sleep(60)
@@ -20,10 +20,10 @@ async def run():
 
 if __name__ == "__main__":
     try:
-        console.print("[dim]KAIROS starting...[/dim]")
+        console.print("[dim]auto-agent starting...[/dim]")
         asyncio.run(run())
     except KeyboardInterrupt:
-        console.print("[dim]KAIROS stopped.[/dim]")
+        console.print("[dim]auto-agent stopped.[/dim]")
     except Exception as e:
-        console.print(f"[red]KAIROS error:[/red] {e}")
+        console.print(f"[red]auto-agent error:[/red] {e}")
         sys.exit(1)

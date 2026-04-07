@@ -65,9 +65,9 @@ async def tick():
                         pass
 
     except asyncio.TimeoutError:
-        console.print("[yellow][kairos] tick timed out[/yellow]")
+        console.print("[yellow][auto-agent] tick timed out[/yellow]")
         return
     except Exception as e:
         import traceback
-        console.print(f"[red][kairos] tick error:[/red] {e}")
+        console.print(f"[red][auto-agent] tick error:[/red] {e}")
         console.print(f"[red]{traceback.format_exc()}[/red]")

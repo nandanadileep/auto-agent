@@ -30,7 +30,7 @@ async def ask_tick_model(prompt: str) -> str:
         text = response.choices[0].message.content
         return text.strip() if text else "SLEEP"
     except Exception as e:
-        console.print(f"[red][kairos] tick model error:[/red] {e}")
+        console.print(f"[red][auto-agent] tick model error:[/red] {e}")
         return "SLEEP"
 
 
@@ -45,5 +45,5 @@ async def ask_dream_model(prompt: str) -> str:
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
-        console.print(f"[red][kairos] dream model error:[/red] {e}")
+        console.print(f"[red][auto-agent] dream model error:[/red] {e}")
         return ""

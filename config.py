@@ -15,7 +15,7 @@ if not GITHUB_TOKEN:
 if not GITHUB_REPO:
     raise EnvironmentError("GITHUB_REPO is required but not set in .env (format: username/reponame)")
 
-TICK_INTERVAL_MINUTES = 5
+TICK_INTERVAL_MINUTES = 1
 TICK_TIMEOUT_SECONDS = 120
 IDLE_THRESHOLD_SECONDS = 300
 MEMORY_MD_PATH = "memory/MEMORY.md"
