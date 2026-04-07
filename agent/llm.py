@@ -12,7 +12,7 @@ console = Console()
 async def ask_tick_model(prompt: str) -> str:
     try:
         response = await litellm.acompletion(
-            model="gemini/gemma-4-e2b-it",
+            model="gemini/gemma-3n-e2b-it",
             messages=[
                 {
                     "role": "system",
