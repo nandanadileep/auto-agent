@@ -16,14 +16,14 @@ async def ask_tick_model(prompt: str) -> str:
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a silent background coding agent. Respond with exactly one line: either 'SLEEP' or 'ACTION: <what to do>'. Nothing else."
+                    "content": "You are a silent background coding agent. Respond with exactly one line: 'SLEEP', 'ACTION: <what to do>', or 'COMMENT: <pr_number>: <message>'. Nothing else."
                 },
                 {
                     "role": "user",
                     "content": prompt
                 }
             ],
-            max_tokens=50,
+            max_tokens=80,
             temperature=0.1,
             api_key=GOOGLE_AI_STUDIO_KEY,
         )
