@@ -6,6 +6,7 @@ load_dotenv()
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_REPO = os.getenv("GITHUB_REPO")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GOOGLE_AI_STUDIO_KEY = os.getenv("GOOGLE_AI_STUDIO_KEY")
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 KAIROS_REPO_PATH = os.getenv("KAIROS_REPO_PATH", ".")
 

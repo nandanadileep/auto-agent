@@ -1,6 +1,6 @@
 import litellm
 from rich.console import Console
-from config import GROQ_API_KEY
+from config import GROQ_API_KEY, GOOGLE_AI_STUDIO_KEY
 
 console = Console()
 
@@ -8,7 +8,7 @@ console = Console()
 async def ask_tick_model(prompt: str) -> str:
     try:
         response = await litellm.acompletion(
-            model="groq/llama-3.3-70b-versatile",
+            model="gemini/gemma-4-e2b-it",
             messages=[
                 {
                     "role": "system",
@@ -21,7 +21,7 @@ async def ask_tick_model(prompt: str) -> str:
             ],
             max_tokens=50,
             temperature=0.1,
-            api_key=GROQ_API_KEY,
+            api_key=GOOGLE_AI_STUDIO_KEY,
         )
         text = response.choices[0].message.content
         return text.strip() if text else "SLEEP"
