@@ -4,463 +4,543 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KAIROS</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0a0a0a;
-      --surface: #111111;
-      --border: #1e1e1e;
-      --text: #e2e2e2;
-      --muted: #666;
-      --accent: #7c6aff;
-      --accent-soft: rgba(124, 106, 255, 0.12);
-      --green: #3ecf8e;
-      --red: #ff6b6b;
-      --yellow: #ffd166;
+      --accent: #a78bfa;
+      --accent2: #60a5fa;
+      --text: #f1f5f9;
+      --muted: rgba(241,245,249,0.45);
+      --green: #34d399;
+      --yellow: #fbbf24;
     }
 
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', sans-serif;
-      line-height: 1.6;
       min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      background: #050510;
+    }
+
+    /* animated bg */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(139,92,246,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(59,130,246,0.14) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 60% 30%, rgba(167,139,250,0.08) 0%, transparent 50%),
+        #050510;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px;
+      pointer-events: none;
+    }
+
+    .wrap { position: relative; z-index: 2; }
+
+    /* glass mixin */
+    .glass {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.08);
     }
 
     a { color: var(--accent); text-decoration: none; }
-    a:hover { text-decoration: underline; }
 
     /* nav */
     nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1.2rem 2rem;
-      border-bottom: 1px solid var(--border);
+      padding: 1.1rem 2.5rem;
       position: sticky;
       top: 0;
-      background: rgba(10,10,10,0.9);
-      backdrop-filter: blur(10px);
       z-index: 100;
+      background: rgba(5,5,16,0.6);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
     }
     .nav-logo {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 1rem;
-      font-weight: 500;
-      letter-spacing: 0.15em;
-      color: var(--text);
+      font-size: 0.95rem;
+      letter-spacing: 0.2em;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    .nav-links { display: flex; gap: 1.8rem; }
-    .nav-links a { color: var(--muted); font-size: 0.875rem; transition: color 0.2s; }
-    .nav-links a:hover { color: var(--text); text-decoration: none; }
+    .nav-links { display: flex; gap: 2rem; }
+    .nav-links a { font-size: 0.85rem; color: var(--muted); transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
 
     /* hero */
     .hero {
-      max-width: 760px;
+      max-width: 800px;
       margin: 0 auto;
-      padding: 6rem 2rem 4rem;
+      padding: 7rem 2rem 5rem;
       text-align: center;
     }
+
     .badge {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
       color: var(--accent);
-      background: var(--accent-soft);
-      border: 1px solid rgba(124,106,255,0.25);
-      padding: 0.3rem 0.8rem;
+      background: rgba(167,139,250,0.1);
+      border: 1px solid rgba(167,139,250,0.2);
+      padding: 0.35rem 1rem;
       border-radius: 999px;
-      margin-bottom: 1.8rem;
+      margin-bottom: 2rem;
     }
+    .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
     .hero h1 {
-      font-size: clamp(2.4rem, 6vw, 3.8rem);
+      font-size: clamp(2.6rem, 7vw, 4.4rem);
       font-weight: 600;
-      letter-spacing: -0.03em;
-      line-height: 1.15;
-      margin-bottom: 1.2rem;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      margin-bottom: 1.4rem;
     }
-    .hero h1 span { color: var(--accent); }
+    .hero h1 .grad {
+      background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 50%, #a78bfa 100%);
+      background-size: 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s linear infinite;
+    }
+    @keyframes shimmer { 0% { background-position: 0% } 100% { background-position: 200% } }
+
     .hero p {
       font-size: 1.05rem;
       color: var(--muted);
-      max-width: 540px;
-      margin: 0 auto 2.4rem;
+      max-width: 520px;
+      margin: 0 auto 2.5rem;
+      font-weight: 300;
     }
+
     .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
     .btn {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.65rem 1.4rem;
-      border-radius: 8px;
+      padding: 0.7rem 1.5rem;
+      border-radius: 10px;
       font-size: 0.875rem;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.25s;
       border: none;
+      text-decoration: none;
     }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-primary:hover { background: #6a59ee; text-decoration: none; }
-    .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
-    .btn-ghost:hover { border-color: #444; text-decoration: none; }
+    .btn-primary {
+      background: linear-gradient(135deg, #7c3aed, #3b82f6);
+      color: #fff;
+      box-shadow: 0 0 30px rgba(124,58,237,0.35);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0 40px rgba(124,58,237,0.5); }
+    .btn-ghost {
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.09); }
 
     /* terminal */
     .terminal {
-      max-width: 600px;
-      margin: 3rem auto 0;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
+      max-width: 620px;
+      margin: 3.5rem auto 0;
+      border-radius: 16px;
       overflow: hidden;
       text-align: left;
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
     }
     .terminal-bar {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.75rem 1rem;
-      background: #161616;
-      border-bottom: 1px solid var(--border);
+      padding: 0.8rem 1.1rem;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
     }
     .dot { width: 10px; height: 10px; border-radius: 50%; }
     .dot-red { background: #ff5f56; }
     .dot-yellow { background: #ffbd2e; }
     .dot-green { background: #27c93f; }
-    .terminal-label { font-size: 0.75rem; color: var(--muted); margin-left: auto; font-family: 'JetBrains Mono', monospace; }
-    .terminal-body { padding: 1.2rem 1.4rem; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 1.8; }
+    .terminal-label { font-size: 0.72rem; color: var(--muted); margin-left: auto; font-family: 'JetBrains Mono', monospace; }
+    .terminal-body { padding: 1.3rem 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 1.9; }
     .t-dim { color: var(--muted); }
     .t-green { color: var(--green); }
     .t-accent { color: var(--accent); }
     .t-yellow { color: var(--yellow); }
 
-    /* section */
-    section {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 5rem 2rem;
+    /* divider */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent);
+      margin: 0 2rem;
     }
+
+    /* section */
+    section { max-width: 960px; margin: 0 auto; padding: 5rem 2rem; }
     .section-label {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
       color: var(--accent);
-      margin-bottom: 0.6rem;
       text-transform: uppercase;
+      margin-bottom: 0.7rem;
     }
     h2 {
-      font-size: 1.8rem;
+      font-size: 2rem;
       font-weight: 600;
-      letter-spacing: -0.02em;
-      margin-bottom: 1rem;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.8rem;
     }
-    .section-sub {
-      color: var(--muted);
-      font-size: 0.95rem;
-      margin-bottom: 2.5rem;
-    }
-    hr { border: none; border-top: 1px solid var(--border); }
+    .section-sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 2.8rem; font-weight: 300; }
 
     /* features */
     .features {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 1px;
-      background: var(--border);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
     }
     .feature {
-      background: var(--surface);
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
       padding: 1.6rem;
-    }
-    .feature-icon { font-size: 1.4rem; margin-bottom: 0.8rem; }
-    .feature h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; }
-    .feature p { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
-
-    /* architecture */
-    .arch-img {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--surface);
-      min-height: 300px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--muted);
-      font-size: 0.875rem;
+      transition: all 0.3s;
+      position: relative;
       overflow: hidden;
     }
-    .arch-img img {
-      width: 100%;
-      border-radius: 12px;
-      display: block;
+    .feature::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(167,139,250,0.05), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
     }
+    .feature:hover { border-color: rgba(167,139,250,0.2); transform: translateY(-2px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+    .feature:hover::before { opacity: 1; }
+    .feature-icon { font-size: 1.5rem; margin-bottom: 0.9rem; }
+    .feature h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .feature p { font-size: 0.84rem; color: var(--muted); line-height: 1.6; font-weight: 300; }
 
-    /* setup */
-    .steps { display: flex; flex-direction: column; gap: 1.5rem; }
-    .step { display: flex; gap: 1.2rem; }
+    /* arch */
+    .arch-wrap {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.02);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+    }
+    .arch-wrap img { width: 100%; display: block; }
+
+    /* steps */
+    .steps { display: flex; flex-direction: column; gap: 1px; }
+    .step {
+      display: flex;
+      gap: 1.5rem;
+      padding: 1.8rem;
+      background: rgba(255,255,255,0.02);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+      margin-bottom: 1rem;
+      transition: border-color 0.3s;
+    }
+    .step:hover { border-color: rgba(167,139,250,0.15); }
     .step-num {
       flex-shrink: 0;
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
-      background: var(--accent-soft);
-      border: 1px solid rgba(124,106,255,0.3);
+      background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(59,130,246,0.3));
+      border: 1px solid rgba(167,139,250,0.3);
       color: var(--accent);
       font-size: 0.75rem;
       font-weight: 600;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-top: 0.1rem;
+      margin-top: 0.15rem;
     }
-    .step-content h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.3rem; }
-    .step-content p { font-size: 0.875rem; color: var(--muted); }
+    .step-content h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; }
+    .step-content p { font-size: 0.875rem; color: var(--muted); font-weight: 300; }
     pre {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
       padding: 1rem 1.2rem;
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.8rem;
       color: var(--text);
       overflow-x: auto;
-      margin-top: 0.6rem;
-      line-height: 1.7;
+      margin-top: 0.8rem;
+      line-height: 1.8;
     }
     code {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85em;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      font-size: 0.82em;
+      background: rgba(167,139,250,0.1);
+      border: 1px solid rgba(167,139,250,0.15);
       padding: 0.1em 0.4em;
       border-radius: 4px;
+      color: var(--accent);
     }
 
-    /* env table */
-    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin-top: 1rem; }
+    /* table */
+    .table-wrap {
+      margin-top: 1rem;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.855rem; }
     th {
       text-align: left;
-      padding: 0.6rem 1rem;
+      padding: 0.7rem 1.1rem;
       color: var(--muted);
       font-weight: 500;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.8rem;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      font-size: 0.78rem;
     }
-    td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top; }
-    td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--accent); white-space: nowrap; }
-    td:last-child { color: var(--muted); }
-    .req { color: var(--red); font-size: 0.72rem; font-weight: 500; }
-    .opt { color: var(--muted); font-size: 0.72rem; }
+    td { padding: 0.8rem 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 0.76rem; color: var(--accent); white-space: nowrap; }
+    td:last-child { color: var(--muted); font-weight: 300; }
+    .req { color: #f87171; font-size: 0.7rem; font-weight: 500; }
+    .opt { color: var(--muted); font-size: 0.7rem; }
 
     /* stack */
-    .stack-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.6rem;
-      margin-top: 1rem;
-    }
+    .stack-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.2rem; }
     .tag {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.75rem;
-      padding: 0.35rem 0.8rem;
-      border-radius: 6px;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      font-size: 0.73rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
       color: var(--muted);
+      transition: all 0.2s;
     }
+    .tag:hover { border-color: rgba(167,139,250,0.3); color: var(--text); }
 
     /* footer */
     footer {
-      border-top: 1px solid var(--border);
-      padding: 2rem;
       text-align: center;
+      padding: 2.5rem;
       font-size: 0.8rem;
       color: var(--muted);
+      border-top: 1px solid rgba(255,255,255,0.05);
     }
-    footer span { color: var(--text); }
+    footer a { color: var(--muted); }
+    footer a:hover { color: var(--text); }
   </style>
 </head>
 <body>
+  <div class="bg"></div>
+  <div class="noise"></div>
+  <div class="wrap">
 
-  <nav>
-    <div class="nav-logo">KAIROS</div>
-    <div class="nav-links">
-      <a href="#how-it-works">How it works</a>
-      <a href="#setup">Setup</a>
-      <a href="https://github.com/nandanadileep/Kairos-mini" target="_blank">GitHub</a>
-    </div>
-  </nav>
+    <nav>
+      <div class="nav-logo">KAIROS</div>
+      <div class="nav-links">
+        <a href="#how-it-works">How it works</a>
+        <a href="#setup">Setup</a>
+        <a href="https://github.com/nandanadileep/Kairos-mini" target="_blank">GitHub</a>
+      </div>
+    </nav>
 
-  <!-- hero -->
-  <div class="hero">
-    <div class="badge">open source · autonomous · background agent</div>
-    <h1>Your repo has a<br/><span>silent co-pilot</span></h1>
-    <p>KAIROS watches your codebase while you work. It finds TODOs, flags stale PRs, and posts useful comments — without interrupting your flow.</p>
-    <div class="hero-actions">
-      <a class="btn btn-primary" href="#setup">Get started</a>
-      <a class="btn btn-ghost" href="https://github.com/nandanadileep/Kairos-mini" target="_blank">View on GitHub</a>
-    </div>
+    <!-- hero -->
+    <div class="hero">
+      <div class="badge">open source · autonomous · background agent</div>
+      <h1>Your repo has a<br/><span class="grad">silent co-pilot</span></h1>
+      <p>KAIROS watches your codebase while you work. It finds TODOs, flags stale PRs, and posts comments — without interrupting your flow.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#setup">Get started</a>
+        <a class="btn btn-ghost" href="https://github.com/nandanadileep/Kairos-mini" target="_blank">View on GitHub</a>
+      </div>
 
-    <div class="terminal">
-      <div class="terminal-bar">
-        <div class="dot dot-red"></div>
-        <div class="dot dot-yellow"></div>
-        <div class="dot dot-green"></div>
-        <div class="terminal-label">main.py</div>
-      </div>
-      <div class="terminal-body">
-        <div class="t-dim">$ python3 main.py</div>
-        <div class="t-dim">KAIROS starting...</div>
-        <div class="t-dim">KAIROS running. Press Ctrl+C to stop.</div>
-        <div>&nbsp;</div>
-        <div><span class="t-dim">KAIROS</span> <span>3 unresolved TODOs in agent/tools.py</span></div>
-        <div><span class="t-dim">KAIROS</span> <span class="t-green">commented on PR #4 — stale for 6 days</span></div>
-        <div><span class="t-dim">KAIROS</span> <span class="t-accent">ACTION: add error handling to tools.py</span></div>
-      </div>
-    </div>
-  </div>
-
-  <hr />
-
-  <!-- features -->
-  <section id="how-it-works">
-    <div class="section-label">What it does</div>
-    <h2>Aware of your repo. Silent by default.</h2>
-    <p class="section-sub">KAIROS ticks every 5 minutes, reads everything, and speaks only when it has something useful to say.</p>
-
-    <div class="features">
-      <div class="feature">
-        <div class="feature-icon">🔍</div>
-        <h3>Repo awareness</h3>
-        <p>Reads git history, modified files, TODOs, FIXMEs, HACKs, and missing env keys on every tick.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">👁</div>
-        <h3>Presence detection</h3>
-        <p>Detects if you're at your Mac via idle time. Loud when you're away, quiet when you're present.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">💬</div>
-        <h3>PR comments</h3>
-        <p>When it finds something relevant to an open PR, it posts a comment autonomously — prefixed with <code>KAIROS:</code>.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">🧠</div>
-        <h3>Persistent memory</h3>
-        <p>Every night it consolidates what it observed into a rolling MEMORY.md so it gets smarter over time.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">🔔</div>
-        <h3>Desktop notifications</h3>
-        <p>Steps away for 5 min? You'll get a native Mac notification with whatever it found.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">🚫</div>
-        <h3>Never duplicates</h3>
-        <p>Logs every action to SQLite. Won't surface the same nudge twice in the same day.</p>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
+          <div class="terminal-label">main.py</div>
+        </div>
+        <div class="terminal-body">
+          <div class="t-dim">$ python3 main.py</div>
+          <div class="t-dim">KAIROS starting...</div>
+          <div class="t-dim">KAIROS running. Press Ctrl+C to stop.</div>
+          <div>&nbsp;</div>
+          <div><span class="t-dim">KAIROS</span> <span>3 unresolved TODOs in agent/tools.py</span></div>
+          <div><span class="t-dim">KAIROS</span> <span class="t-green">commented on PR #4 — stale for 6 days</span></div>
+          <div><span class="t-dim">KAIROS</span> <span class="t-accent">ACTION: add error handling to tools.py</span></div>
+        </div>
       </div>
     </div>
-  </section>
 
-  <hr />
+    <div class="divider"></div>
 
-  <!-- architecture -->
-  <section id="architecture">
-    <div class="section-label">Architecture</div>
-    <h2>How the tick loop works</h2>
-    <p class="section-sub">Every minute: build context → detect presence → ask the model → act or sleep.</p>
+    <!-- features -->
+    <section id="how-it-works">
+      <div class="section-label">What it does</div>
+      <h2>Aware of your repo. Silent by default.</h2>
+      <p class="section-sub">Ticks every 5 minutes, reads everything, speaks only when it has something useful to say.</p>
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon">🔍</div>
+          <h3>Repo awareness</h3>
+          <p>Reads git history, modified files, TODOs, FIXMEs, HACKs, and missing env keys on every tick.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">👁</div>
+          <h3>Presence detection</h3>
+          <p>Detects if you're at your Mac via idle time. Loud when you're away, quiet when you're present.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">💬</div>
+          <h3>Autonomous PR comments</h3>
+          <p>Finds something relevant to an open PR? It posts a comment autonomously, prefixed with <code>KAIROS:</code>.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🧠</div>
+          <h3>Persistent memory</h3>
+          <p>Every night consolidates observations into a rolling MEMORY.md so it gets smarter over time.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🔔</div>
+          <h3>Desktop notifications</h3>
+          <p>Step away for 5 minutes? You'll get a native Mac notification with whatever it found.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🚫</div>
+          <h3>Never duplicates</h3>
+          <p>Logs every action to SQLite. Won't surface the same nudge twice in a day.</p>
+        </div>
+      </div>
+    </section>
 
-    <div class="arch-img">
-      <img src="architecture.png" alt="KAIROS architecture diagram" />
-    </div>
-  </section>
+    <div class="divider"></div>
 
-  <hr />
+    <!-- architecture -->
+    <section id="architecture">
+      <div class="section-label">Architecture</div>
+      <h2>How the tick loop works</h2>
+      <p class="section-sub">Every minute: build context → detect presence → ask the model → act or sleep.</p>
+      <div class="arch-wrap">
+        <img src="architecture.png" alt="KAIROS architecture diagram" />
+      </div>
+    </section>
 
-  <!-- setup -->
-  <section id="setup">
-    <div class="section-label">Setup</div>
-    <h2>Up in 2 minutes</h2>
-    <p class="section-sub">Requires Python 3.10+, a Groq API key, and a GitHub personal access token.</p>
+    <div class="divider"></div>
 
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-content">
-          <h3>Clone and install</h3>
-          <pre>git clone https://github.com/nandanadileep/Kairos-mini.git
+    <!-- setup -->
+    <section id="setup">
+      <div class="section-label">Setup</div>
+      <h2>Up in 2 minutes</h2>
+      <p class="section-sub">Requires Python 3.10+, a Groq API key, and a GitHub personal access token.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h3>Clone and install</h3>
+            <pre>git clone https://github.com/nandanadileep/Kairos-mini.git
 cd Kairos-mini
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h3>Configure your .env</h3>
+            <p>Copy the example and fill in your keys.</p>
+            <pre>cp .env.example .env</pre>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Key</th><th></th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td>GITHUB_TOKEN</td><td><span class="req">required</span></td><td>Personal access token with <code>repo</code> scope</td></tr>
+                  <tr><td>GITHUB_REPO</td><td><span class="req">required</span></td><td>Repo to watch, e.g. <code>username/repo</code></td></tr>
+                  <tr><td>GROQ_API_KEY</td><td><span class="req">required</span></td><td>From console.groq.com — free tier works</td></tr>
+                  <tr><td>GOOGLE_AI_STUDIO_KEY</td><td><span class="req">required</span></td><td>From aistudio.google.com — for tick model</td></tr>
+                  <tr><td>KAIROS_REPO_PATH</td><td><span class="req">required</span></td><td>Absolute path to your local repo</td></tr>
+                  <tr><td>OLLAMA_BASE_URL</td><td><span class="opt">optional</span></td><td>Defaults to <code>http://localhost:11434</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h3>Run</h3>
+            <pre>python3 main.py</pre>
+            <p>KAIROS starts silently. It prints a line only when it has something useful to say.</p>
+          </div>
         </div>
       </div>
+    </section>
 
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-content">
-          <h3>Configure your .env</h3>
-          <p>Copy the example and fill in your keys.</p>
-          <pre>cp .env.example .env</pre>
-          <table>
-            <thead>
-              <tr><th>Key</th><th></th><th>Description</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>GITHUB_TOKEN</td><td><span class="req">required</span></td><td>Personal access token with <code>repo</code> scope</td></tr>
-              <tr><td>GITHUB_REPO</td><td><span class="req">required</span></td><td>Repo to watch, e.g. <code>username/repo</code></td></tr>
-              <tr><td>GROQ_API_KEY</td><td><span class="req">required</span></td><td>From console.groq.com — free tier works</td></tr>
-              <tr><td>GOOGLE_AI_STUDIO_KEY</td><td><span class="req">required</span></td><td>From aistudio.google.com — for tick model</td></tr>
-              <tr><td>KAIROS_REPO_PATH</td><td><span class="req">required</span></td><td>Absolute path to your local repo</td></tr>
-              <tr><td>OLLAMA_BASE_URL</td><td><span class="opt">optional</span></td><td>Defaults to <code>http://localhost:11434</code></td></tr>
-            </tbody>
-          </table>
-        </div>
+    <div class="divider"></div>
+
+    <!-- stack -->
+    <section>
+      <div class="section-label">Stack</div>
+      <h2>Built with</h2>
+      <div class="stack-grid">
+        <span class="tag">Python 3.10+</span>
+        <span class="tag">APScheduler</span>
+        <span class="tag">litellm</span>
+        <span class="tag">Groq — llama-3.3-70b</span>
+        <span class="tag">Google AI Studio — gemma-3n-e2b</span>
+        <span class="tag">PyGithub</span>
+        <span class="tag">rich</span>
+        <span class="tag">plyer</span>
+        <span class="tag">sqlite-utils</span>
+        <span class="tag">gitpython</span>
+        <span class="tag">tiktoken</span>
       </div>
+      <p style="margin-top:1.4rem;font-size:0.84rem;color:var(--muted);font-weight:300;">
+        Inspired by the KAIROS agent architecture described in Anthropic's Claude Code behavioral specification.
+      </p>
+    </section>
 
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-content">
-          <h3>Run</h3>
-          <pre>python3 main.py</pre>
-          <p>KAIROS starts silently. It will print a line only when it has something useful to say.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+    <footer>
+      <p>MIT License · 2026 · Nandana Dileep · <a href="https://github.com/nandanadileep/Kairos-mini" target="_blank">GitHub</a></p>
+    </footer>
 
-  <hr />
-
-  <!-- stack -->
-  <section>
-    <div class="section-label">Stack</div>
-    <h2>Built with</h2>
-    <div class="stack-grid">
-      <span class="tag">Python 3.10+</span>
-      <span class="tag">APScheduler</span>
-      <span class="tag">litellm</span>
-      <span class="tag">Groq — llama-3.3-70b</span>
-      <span class="tag">Google AI Studio — gemma-3n-e2b</span>
-      <span class="tag">PyGithub</span>
-      <span class="tag">rich</span>
-      <span class="tag">plyer</span>
-      <span class="tag">sqlite-utils</span>
-      <span class="tag">gitpython</span>
-      <span class="tag">tiktoken</span>
-    </div>
-    <p style="margin-top:1.2rem; font-size:0.85rem; color:var(--muted);">
-      Inspired by the KAIROS agent architecture described in Anthropic's Claude Code behavioral specification.
-    </p>
-  </section>
-
-  <footer>
-    <p>MIT License · 2026 · <span>Nandana Dileep</span> · <a href="https://github.com/nandanadileep/Kairos-mini" target="_blank">GitHub</a></p>
-  </footer>
-
+  </div>
 </body>
 </html>
