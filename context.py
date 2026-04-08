@@ -1,3 +1,4 @@
+import ast
 import subprocess
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -116,6 +117,51 @@ def _project_structure_section() -> dict:
         return {"readme_exists": False, "deps": "", "missing_env_keys": []}
 
 
+def _never_imported_section() -> list:
+    try:
+        root = Path(KAIROS_REPO_PATH)
+        ENTRY_POINTS = {"main.py", "config.py", "setup.py", "conftest.py", "demo.py", "run_tests.py"}
+
+        all_py = [
+            p for p in root.rglob("*.py")
+            if not any(skip in p.parts for skip in SKIP_DIRS)
+            and p.name != "__init__.py"
+        ]
+
+        # collect all imported module names across the entire codebase (including entry points)
+        imported = set()
+        for path in all_py:
+            try:
+                tree = ast.parse(path.read_text(errors="ignore"))
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.Import):
+                        for alias in node.names:
+                            imported.add(alias.name.split(".")[0])
+                            imported.add(alias.name)
+                    elif isinstance(node, ast.ImportFrom):
+                        if node.module:
+                            imported.add(node.module.split(".")[0])
+                            imported.add(node.module)
+            except Exception:
+                continue
+
+        # check which non-entry-point files are never referenced
+        never_imported = []
+        for path in all_py:
+            if path.name in ENTRY_POINTS:
+                continue
+            rel = path.relative_to(root)
+            # build both dotted module name and stem
+            module_dotted = ".".join(rel.with_suffix("").parts)
+            module_stem = path.stem
+            if module_dotted not in imported and module_stem not in imported:
+                never_imported.append(str(rel))
+
+        return sorted(never_imported)
+    except Exception:
+        return []
+
+
 def _memory_section() -> dict:
     try:
         topics = read_all_topics()
@@ -132,6 +178,7 @@ async def build_context() -> dict:
     ctx = {
         "git": _git_section(max_commits=10),
         "filesystem": _filesystem_section(),
+        "never_imported": _never_imported_section(),
         "project": _project_structure_section(),
         "memory": _memory_section(),
     }
