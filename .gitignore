@@ -5,3 +5,4 @@ __pycache__/
 kairos.db
 logs/
 memory/MEMORY.md
+memory/topics/
