@@ -117,6 +117,72 @@ def _project_structure_section() -> dict:
         return {"readme_exists": False, "deps": "", "missing_env_keys": []}
 
 
+def _dangling_imports_section() -> list:
+    try:
+        root = Path(KAIROS_REPO_PATH)
+
+        # build set of all local module dotted names that actually exist
+        existing_modules = set()
+        for p in root.rglob("*.py"):
+            if any(skip in p.parts for skip in SKIP_DIRS):
+                continue
+            rel = p.relative_to(root)
+            existing_modules.add(".".join(rel.with_suffix("").parts))  # e.g. memory.daily_log
+            existing_modules.add(rel.stem)                              # e.g. daily_log
+
+        # local top-level packages/modules (dirs with __init__.py or root .py files)
+        local_roots = set()
+        for p in root.iterdir():
+            if p.is_dir() and (p / "__init__.py").exists() and p.name not in SKIP_DIRS:
+                local_roots.add(p.name)
+            elif p.suffix == ".py" and p.name != "__init__.py":
+                local_roots.add(p.stem)
+
+        dangling = []
+        all_py = [
+            p for p in root.rglob("*.py")
+            if not any(skip in p.parts for skip in SKIP_DIRS)
+        ]
+
+        for path in all_py:
+            try:
+                tree = ast.parse(path.read_text(errors="ignore"))
+            except Exception:
+                continue
+
+            for node in ast.walk(tree):
+                module = None
+                if isinstance(node, ast.Import):
+                    for alias in node.names:
+                        top = alias.name.split(".")[0]
+                        if top in local_roots and alias.name not in existing_modules:
+                            dangling.append({
+                                "file": str(path.relative_to(root)),
+                                "import": alias.name,
+                            })
+                elif isinstance(node, ast.ImportFrom):
+                    if node.module:
+                        top = node.module.split(".")[0]
+                        if top in local_roots and node.module not in existing_modules:
+                            dangling.append({
+                                "file": str(path.relative_to(root)),
+                                "import": node.module,
+                            })
+
+        # deduplicate
+        seen = set()
+        result = []
+        for d in dangling:
+            key = (d["file"], d["import"])
+            if key not in seen:
+                seen.add(key)
+                result.append(d)
+
+        return result
+    except Exception:
+        return []
+
+
 def _never_imported_section() -> list:
     try:
         root = Path(KAIROS_REPO_PATH)
@@ -179,6 +245,7 @@ async def build_context() -> dict:
         "git": _git_section(max_commits=10),
         "filesystem": _filesystem_section(),
         "never_imported": _never_imported_section(),
+        "dangling_imports": _dangling_imports_section(),
         "project": _project_structure_section(),
         "memory": _memory_section(),
     }
