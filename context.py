@@ -6,6 +6,7 @@ import tiktoken
 from git import Repo, InvalidGitRepositoryError
 
 from config import KAIROS_REPO_PATH, MAX_CONTEXT_TOKENS, MEMORY_MD_PATH
+from memory.memory_md import read_all_topics, read_memory_md
 
 SKIP_DIRS = {"node_modules", "__pycache__", ".git", ".venv"}
 
@@ -115,14 +116,16 @@ def _project_structure_section() -> dict:
         return {"readme_exists": False, "deps": "", "missing_env_keys": []}
 
 
-def _memory_section() -> str:
+def _memory_section() -> dict:
     try:
-        path = Path(MEMORY_MD_PATH)
-        if path.exists():
-            return path.read_text(errors="ignore")
-        return ""
+        topics = read_all_topics()
+        if topics:
+            return topics
+        # fallback to flat MEMORY.md if no topics yet
+        flat = read_memory_md()
+        return {"memory": flat} if flat else {}
     except Exception:
-        return ""
+        return {}
 
 
 async def build_context() -> dict:
