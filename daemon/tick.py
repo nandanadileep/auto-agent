@@ -22,7 +22,12 @@ async def tick():
 
             pr_summary = ""
             if open_prs:
-                pr_lines = [f"  PR #{p['number']}: {p['title']} ({p['days_open']}d open, review: {p['review_status']}, stale: {p['is_stale']})" for p in open_prs]
+                pr_lines = []
+                for p in open_prs:
+                    line = f"  PR #{p['number']}: {p['title']} ({p['days_open']}d open, review: {p['review_status']}, stale: {p['is_stale']})"
+                    if p.get("diff"):
+                        line += f"\n  diff:\n{p['diff'][:600]}"
+                    pr_lines.append(line)
                 pr_summary = "\nOpen PRs:\n" + "\n".join(pr_lines)
 
             prompt = (
@@ -51,6 +56,9 @@ async def tick():
                     print_brief(instruction)
 
             elif response.startswith("COMMENT:"):
+                if autonomy == "low":
+                    print_brief("wants to post a PR comment — step away or approve manually")
+                    return
                 body = response[len("COMMENT:"):].strip()
                 parts = body.split(":", 1)
                 if len(parts) == 2:

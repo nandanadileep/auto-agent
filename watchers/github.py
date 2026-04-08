@@ -30,6 +30,16 @@ async def get_open_prs() -> list:
 
             is_stale = days_open > 5 and review_status == "none"
 
+            try:
+                files = pr.get_files()
+                diff_lines = []
+                for f in files:
+                    if f.patch:
+                        diff_lines.append(f"--- {f.filename}\n{f.patch[:500]}")
+                diff = "\n".join(diff_lines)[:2000]
+            except Exception:
+                diff = ""
+
             result.append({
                 "number": pr.number,
                 "title": pr.title,
@@ -37,6 +47,7 @@ async def get_open_prs() -> list:
                 "has_conflicts": pr.mergeable is False,
                 "review_status": review_status,
                 "is_stale": is_stale,
+                "diff": diff,
             })
         return result
     except Exception:
