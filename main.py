@@ -8,14 +8,22 @@ console = Console()
 
 async def run():
     from daemon.scheduler import start_scheduler
+    from watchers.filesystem import watch_and_tick
 
     scheduler = start_scheduler()
     console.print("[dim]auto-agent running. Press Ctrl+C to stop.[/dim]")
     try:
-        while True:
-            await asyncio.sleep(60)
+        await asyncio.gather(
+            watch_and_tick(),
+            _keepalive(),
+        )
     finally:
         scheduler.shutdown()
+
+
+async def _keepalive():
+    while True:
+        await asyncio.sleep(60)
 
 
 if __name__ == "__main__":
