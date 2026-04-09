@@ -41,3 +41,60 @@ def get_todays_actions() -> list:
     ))
     columns = [col[1] for col in db.execute("PRAGMA table_info(actions)").fetchall()]
     return [dict(zip(columns, row)) for row in rows]
+
+
+def _ensure_meta(db):
+    if "meta" not in db.table_names():
+        db["meta"].create({"key": str, "value": str}, pk="key")
+
+
+def log_last_tick():
+    db = _db()
+    _ensure_meta(db)
+    db["meta"].upsert({"key": "last_tick", "value": datetime.now(timezone.utc).isoformat()}, pk="key")
+
+
+def get_last_tick() -> str:
+    db = _db()
+    _ensure_meta(db)
+    try:
+        row = db["meta"].get("last_tick")
+        return row["value"]
+    except Exception:
+        return ""
+
+
+def get_recent_actions(n: int = 10) -> list:
+    db = _db()
+    rows = list(db.execute(
+        "SELECT * FROM actions ORDER BY timestamp DESC LIMIT ?",
+        [n]
+    ))
+    columns = [col[1] for col in db.execute("PRAGMA table_info(actions)").fetchall()]
+    return [dict(zip(columns, row)) for row in rows]
+
+
+def get_actions_today_count() -> int:
+    today = datetime.now(timezone.utc).date().isoformat()
+    db = _db()
+    rows = list(db.execute(
+        "SELECT COUNT(*) FROM actions WHERE DATE(timestamp) = ?",
+        [today]
+    ))
+    return rows[0][0] if rows else 0
+
+
+def log_last_dream():
+    db = _db()
+    _ensure_meta(db)
+    db["meta"].upsert({"key": "last_dream", "value": datetime.now(timezone.utc).isoformat()}, pk="key")
+
+
+def get_last_dream() -> str:
+    db = _db()
+    _ensure_meta(db)
+    try:
+        row = db["meta"].get("last_dream")
+        return row["value"]
+    except Exception:
+        return ""

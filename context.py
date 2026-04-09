@@ -6,10 +6,10 @@ from pathlib import Path
 import tiktoken
 from git import Repo, InvalidGitRepositoryError
 
-from config import KAIROS_REPO_PATH, MAX_CONTEXT_TOKENS, MEMORY_MD_PATH
+from config import KAIROS_REPO_PATH, MAX_CONTEXT_TOKENS, MEMORY_MD_PATH, WATCHED_EXTENSIONS
 from memory.memory_md import read_all_topics, read_memory_md
 
-SKIP_DIRS = {"node_modules", "__pycache__", ".git", ".venv"}
+SKIP_DIRS = {"node_modules", "__pycache__", ".git", ".venv", "dist", "build", ".next"}
 
 
 def _count_tokens(text: str) -> int:
@@ -44,33 +44,63 @@ def _filesystem_section() -> dict:
     try:
         root = Path(KAIROS_REPO_PATH)
         cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+        ext_set = set(WATCHED_EXTENSIONS)
 
-        modified_py = []
+        # comment markers per language family
+        # hash-comment langs: py, rb, go, rs, sh
+        # slash-comment langs: js, ts, tsx, jsx, cpp, c, java, go, rs
+        # md is special — use <!-- or plain text TODOs
+        HASH_EXTS  = {".py", ".rb", ".sh"}
+        SLASH_EXTS = {".js", ".ts", ".tsx", ".jsx", ".go", ".rs", ".cpp", ".c", ".java"}
+        MD_EXTS    = {".md"}
+
+        modified_by_ext: dict[str, list[str]] = {}
         todos = []
 
-        for path in root.rglob("*.py"):
+        for path in root.rglob("*"):
+            if path.suffix not in ext_set:
+                continue
             if any(skip in path.parts for skip in SKIP_DIRS):
                 continue
+            if not path.is_file():
+                continue
             try:
+                rel = str(path.relative_to(root))
                 mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
                 if mtime > cutoff:
-                    modified_py.append(str(path.relative_to(root)))
+                    modified_by_ext.setdefault(path.suffix, []).append(rel)
 
-                for i, line in enumerate(path.read_text(errors="ignore").splitlines(), start=1):
+                text = path.read_text(errors="ignore")
+                ext = path.suffix
+                for i, line in enumerate(text.splitlines(), start=1):
                     stripped = line.strip()
                     upper = stripped.upper()
-                    if stripped.startswith("#") and any(upper.startswith(f"# {tag}") or upper.startswith(f"#{tag}") for tag in ("TODO", "FIXME", "HACK")):
+                    found = False
+                    if ext in HASH_EXTS:
+                        found = stripped.startswith("#") and any(
+                            upper.startswith(f"# {t}") or upper.startswith(f"#{t}")
+                            for t in ("TODO", "FIXME", "HACK")
+                        )
+                    elif ext in SLASH_EXTS:
+                        found = any(
+                            upper.lstrip("/ ").startswith(t)
+                            for t in ("TODO", "FIXME", "HACK")
+                        ) and stripped.startswith(("//", "/*", "*"))
+                    elif ext in MD_EXTS:
+                        found = any(f"**{t}**" in upper or upper.startswith(t)
+                                    for t in ("TODO", "FIXME", "HACK"))
+                    if found:
                         todos.append({
-                            "file": str(path.relative_to(root)),
+                            "file": rel,
                             "line": i,
-                            "text": line.strip(),
+                            "text": stripped,
                         })
             except Exception:
                 continue
 
-        return {"modified_py_last_24h": modified_py, "todos": todos}
+        return {"modified_files_last_24h": modified_by_ext, "todos": todos}
     except Exception:
-        return {"modified_py_last_24h": [], "todos": []}
+        return {"modified_files_last_24h": {}, "todos": []}
 
 
 def _project_structure_section() -> dict:
@@ -118,67 +148,92 @@ def _project_structure_section() -> dict:
 
 
 def _dangling_imports_section() -> list:
+    import re as _re
     try:
         root = Path(KAIROS_REPO_PATH)
+        dangling = []
+        seen: set[tuple[str, str]] = set()
 
-        # build set of all local module dotted names that actually exist
-        existing_modules = set()
+        def _add(file_rel: str, imp: str):
+            key = (file_rel, imp)
+            if key not in seen:
+                seen.add(key)
+                dangling.append({"file": file_rel, "import": imp})
+
+        # ── Python: AST-based ──────────────────────────────────────────────
+        existing_modules: set[str] = set()
         for p in root.rglob("*.py"):
             if any(skip in p.parts for skip in SKIP_DIRS):
                 continue
             rel = p.relative_to(root)
-            existing_modules.add(".".join(rel.with_suffix("").parts))  # e.g. memory.daily_log
-            existing_modules.add(rel.stem)                              # e.g. daily_log
+            existing_modules.add(".".join(rel.with_suffix("").parts))
+            existing_modules.add(rel.stem)
 
-        # local top-level packages/modules (dirs with __init__.py or root .py files)
-        local_roots = set()
+        local_roots: set[str] = set()
         for p in root.iterdir():
             if p.is_dir() and (p / "__init__.py").exists() and p.name not in SKIP_DIRS:
                 local_roots.add(p.name)
             elif p.suffix == ".py" and p.name != "__init__.py":
                 local_roots.add(p.stem)
 
-        dangling = []
-        all_py = [
-            p for p in root.rglob("*.py")
-            if not any(skip in p.parts for skip in SKIP_DIRS)
-        ]
-
-        for path in all_py:
+        for path in root.rglob("*.py"):
+            if any(skip in path.parts for skip in SKIP_DIRS):
+                continue
             try:
                 tree = ast.parse(path.read_text(errors="ignore"))
             except Exception:
                 continue
-
+            file_rel = str(path.relative_to(root))
             for node in ast.walk(tree):
-                module = None
                 if isinstance(node, ast.Import):
                     for alias in node.names:
                         top = alias.name.split(".")[0]
                         if top in local_roots and alias.name not in existing_modules:
-                            dangling.append({
-                                "file": str(path.relative_to(root)),
-                                "import": alias.name,
-                            })
+                            _add(file_rel, alias.name)
                 elif isinstance(node, ast.ImportFrom):
                     if node.module:
                         top = node.module.split(".")[0]
                         if top in local_roots and node.module not in existing_modules:
-                            dangling.append({
-                                "file": str(path.relative_to(root)),
-                                "import": node.module,
-                            })
+                            _add(file_rel, node.module)
 
-        # deduplicate
-        seen = set()
-        result = []
-        for d in dangling:
-            key = (d["file"], d["import"])
-            if key not in seen:
-                seen.add(key)
-                result.append(d)
+        # ── JS/TS: relative import resolution ─────────────────────────────
+        JS_TS_EXTS = {".js", ".ts", ".tsx", ".jsx"}
+        # pattern: from './foo' or from '../bar/baz' — relative paths only
+        IMPORT_RE = _re.compile(
+            r"""(?:import\s.*?\bfrom\s+|require\s*\(\s*)['"](\.[^'"]+)['"]""",
+            _re.MULTILINE,
+        )
+        JS_SUFFIXES = (".js", ".ts", ".tsx", ".jsx", ".json")
 
-        return result
+        for path in root.rglob("*"):
+            if path.suffix not in JS_TS_EXTS:
+                continue
+            if any(skip in path.parts for skip in SKIP_DIRS):
+                continue
+            if not path.is_file():
+                continue
+            try:
+                text = path.read_text(errors="ignore")
+            except Exception:
+                continue
+            file_rel = str(path.relative_to(root))
+            for m in IMPORT_RE.finditer(text):
+                specifier = m.group(1)
+                # resolve relative to the importing file's directory
+                candidate_base = (path.parent / specifier).resolve()
+                # check if the file exists with any known suffix, or as a directory index
+                exists = (
+                    candidate_base.exists()  # exact match (e.g. foo.ts explicit)
+                    or any((candidate_base.parent / (candidate_base.name + s)).exists()
+                           for s in JS_SUFFIXES)
+                    or any((candidate_base / ("index" + s)).exists()
+                           for s in JS_SUFFIXES)
+                )
+                if not exists:
+                    # keep specifier relative to repo root for readability
+                    _add(file_rel, specifier)
+
+        return dangling
     except Exception:
         return []
 
@@ -187,41 +242,73 @@ def _never_imported_section() -> list:
     try:
         root = Path(KAIROS_REPO_PATH)
         ENTRY_POINTS = {"main.py", "config.py", "setup.py", "conftest.py", "demo.py", "run_tests.py"}
+        JS_TS_EXTS = {".js", ".ts", ".tsx", ".jsx"}
+        JS_TS_ENTRY_STEMS = {"index", "main", "app", "server", "vite.config", "next.config",
+                              "tailwind.config", "postcss.config", "jest.config", "webpack.config"}
 
+        # ── Python: AST-based ──────────────────────────────────────────────
         all_py = [
             p for p in root.rglob("*.py")
             if not any(skip in p.parts for skip in SKIP_DIRS)
             and p.name != "__init__.py"
         ]
 
-        # collect all imported module names across the entire codebase (including entry points)
-        imported = set()
+        imported_py = set()
         for path in all_py:
             try:
                 tree = ast.parse(path.read_text(errors="ignore"))
                 for node in ast.walk(tree):
                     if isinstance(node, ast.Import):
                         for alias in node.names:
-                            imported.add(alias.name.split(".")[0])
-                            imported.add(alias.name)
+                            imported_py.add(alias.name.split(".")[0])
+                            imported_py.add(alias.name)
                     elif isinstance(node, ast.ImportFrom):
                         if node.module:
-                            imported.add(node.module.split(".")[0])
-                            imported.add(node.module)
+                            imported_py.add(node.module.split(".")[0])
+                            imported_py.add(node.module)
             except Exception:
                 continue
 
-        # check which non-entry-point files are never referenced
         never_imported = []
         for path in all_py:
             if path.name in ENTRY_POINTS:
                 continue
             rel = path.relative_to(root)
-            # build both dotted module name and stem
             module_dotted = ".".join(rel.with_suffix("").parts)
             module_stem = path.stem
-            if module_dotted not in imported and module_stem not in imported:
+            if module_dotted not in imported_py and module_stem not in imported_py:
                 never_imported.append(str(rel))
+
+        # ── JS/TS: grep-based filename search ─────────────────────────────
+        all_jsts = [
+            p for p in root.rglob("*")
+            if p.suffix in JS_TS_EXTS
+            and not any(skip in p.parts for skip in SKIP_DIRS)
+            and p.is_file()
+        ]
+
+        # build a corpus of all text to search for references
+        all_jsts_text_parts: list[str] = []
+        for path in all_jsts:
+            try:
+                all_jsts_text_parts.append(path.read_text(errors="ignore"))
+            except Exception:
+                pass
+        jsts_corpus = "\n".join(all_jsts_text_parts)
+
+        import re as _re
+        for path in all_jsts:
+            if path.stem in JS_TS_ENTRY_STEMS:
+                continue
+            stem = path.stem
+            # look for any import referencing this filename (with or without extension)
+            # e.g. from './utils/cache' or from '../cache' or from 'cache'
+            pattern = _re.compile(
+                r"""import\s.*?from\s+['"].*?""" + _re.escape(stem) + r"""['"]""",
+                _re.DOTALL,
+            )
+            if not pattern.search(jsts_corpus):
+                never_imported.append(str(path.relative_to(root)))
 
         return sorted(never_imported)
     except Exception:

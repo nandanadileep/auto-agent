@@ -23,11 +23,13 @@ def notify(message: str):
         print_brief(message)
 
 
-def post_pr_comment(pr_number: int, message: str):
+def post_pr_comment(pr_number: int, message: str) -> bool:
     try:
         gh = Github(GITHUB_TOKEN)
         repo = gh.get_repo(GITHUB_REPO)
         pr = repo.get_pull(pr_number)
         pr.create_issue_comment(f"**auto-agent:** {message}")
+        return True
     except Exception as e:
         print_brief(f"Failed to post PR comment: {e}")
+        return False

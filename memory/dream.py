@@ -3,6 +3,7 @@ import re
 from agent.llm import ask_dream_model
 from memory.daily_log import get_todays_log
 from memory.memory_md import list_topics, read_all_topics, read_topic, write_memory_md, write_topic
+from state import log_action, log_last_dream
 
 
 async def run_autodream():
@@ -68,6 +69,9 @@ Use short lowercase snake_case topic names (e.g. auth, open_prs, testing, depend
         for topic in sorted(list_topics()):
             index_lines.append(f"- [{topic}](topics/{topic}.md)")
         write_memory_md("\n".join(index_lines))
+
+        log_last_dream()
+        log_action(f"AutoDream completed — wrote {len(parsed)} topic files")
 
     except Exception as e:
         from actions import print_brief

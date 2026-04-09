@@ -9,3 +9,6 @@ pyobjus
 sqlite-utils
 tiktoken
 python-dotenv
+fastapi
+uvicorn
+pyngrok

@@ -7,13 +7,14 @@ from actions import notify, post_pr_comment, print_brief
 from agent.llm import ask_tick_model
 from context import build_context
 from presence import get_autonomy_level
-from state import already_notified_today, log_action
+from state import already_notified_today, log_action, log_last_tick
 from watchers.github import get_open_prs
 
 console = Console()
 
 
 async def tick():
+    log_last_tick()
     try:
         async with asyncio.timeout(config.TICK_TIMEOUT_SECONDS):
             ctx = await build_context()
@@ -42,6 +43,12 @@ async def tick():
 
             response = await ask_tick_model(prompt)
 
+            if config.VERBOSE_TICKS:
+                fs = ctx.get('filesystem', {})
+                modified = fs.get('modified_files_last_24h', {})
+                total_modified = sum(len(v) for v in modified.values())
+                console.print(f"[dim]autonomy: {autonomy} · todos: {len(fs.get('todos', []))} · modified: {total_modified} · never_imported: {ctx.get('never_imported', [])} · dangling: {ctx.get('dangling_imports', [])} · response: {response}[/dim]")
+
             if not response or response.startswith("SLEEP"):
                 return
 
@@ -56,18 +63,22 @@ async def tick():
                     print_brief(instruction)
 
             elif response.startswith("COMMENT:"):
-                if autonomy == "low":
-                    print_brief("wants to post a PR comment — step away or approve manually")
-                    return
                 body = response[len("COMMENT:"):].strip()
                 parts = body.split(":", 1)
                 if len(parts) == 2:
                     try:
                         pr_number = int(parts[0].strip())
                         message = parts[1].strip()
-                        if not already_notified_today(f"comment:pr#{pr_number}:{message}"):
-                            post_pr_comment(pr_number, message)
-                            log_action(f"comment:pr#{pr_number}:{message}", pr_id=pr_number)
+                        dedup_key = f"comment:pr#{pr_number}"
+                        if already_notified_today(dedup_key):
+                            return
+                        if autonomy == "low":
+                            log_action(dedup_key, pr_id=pr_number)
+                            print_brief("wants to post a PR comment — step away or approve manually")
+                            return
+                        ok = post_pr_comment(pr_number, message)
+                        if ok:
+                            log_action(dedup_key, pr_id=pr_number)
                             print_brief(f"commented on PR #{pr_number}")
                     except ValueError:
                         pass
