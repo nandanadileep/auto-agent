@@ -11,9 +11,74 @@ Open-source autonomous background coding agent — inspired by Anthropic's unrel
 - Runs a nightly memory pass that consolidates everything it observed into a rolling `MEMORY.md` so context persists across sessions
 - Never touches your code — observation and nudges only
 
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                          main.py                                │
+│   asyncio event loop — scheduler + filesystem watcher           │
+└────────┬──────────────────────────┬────────────────────────────┘
+         │ every N minutes          │ file change (watchfiles)
+         ▼                          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        daemon/tick.py                           │
+│                                                                 │
+│  1. build_context()      — git, filesystem, PRs, memory         │
+│  2. get_autonomy_level() — idle time → low / medium / high      │
+│  3. ask_tick_model()     — Groq LLM prompt                      │
+│  4. act on response      — SLEEP / ACTION / COMMENT             │
+└────────┬────────────────────────────────────────────────────────┘
+         │
+         ├── context.py ──────────────────────────────────────────
+         │   • git history & recently changed files
+         │   • TODO / FIXME / HACK scanner (.py .js .ts .go …)
+         │   • never-imported file detection (Python AST, JS grep)
+         │   • dangling imports (Python AST, JS relative path check)
+         │   • missing .env keys vs .env.example
+         │
+         ├── presence.py ─────────────────────────────────────────
+         │   • macOS: ioreg HIDIdleTime
+         │   • Windows: GetLastInputInfo
+         │   • Linux: xprintidle
+         │   → low (typing) / medium (60s) / high (threshold)
+         │
+         ├── watchers/github.py ──────────────────────────────────
+         │   • open PRs with diff, review status, staleness
+         │
+         ├── state.py ────────────────────────────────────────────
+         │   • SQLite via sqlite-utils
+         │   • actions table — dedup, daily log, PR comments
+         │   • meta table — last_tick, last_dream timestamps
+         │
+         └── actions.py ──────────────────────────────────────────
+             • desktop notify (plyer) or terminal line (rich)
+             • post PR comment via PyGithub
+
+┌─────────────────────────────────────────────────────────────────┐
+│                      memory/dream.py                            │
+│   cron: midnight — reads today's log, LLM consolidates          │
+│   into topic files (memory/topics/*.md) + MEMORY.md index       │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                    dashboard/server.py                          │
+│   FastAPI — localhost:8000                                      │
+│                                                                 │
+│   GET  /              dark/light dashboard (single HTML page)   │
+│   GET  /api/status    autonomy, actions, memory summary         │
+│   GET  /api/prs       open PRs from GitHub                      │
+│   GET  /api/memory    topics, today's log, dream countdown      │
+│   POST /api/tick      trigger tick immediately                  │
+│   POST /api/dream     trigger AutoDream in background thread    │
+│   POST /api/approve/:n  post operator approval comment on PR    │
+│   POST /webhook/github  GitHub webhook — HMAC verified,         │
+│                          triggers tick on PR / push events      │
+└─────────────────────────────────────────────────────────────────┘
+```
+
 ## How it works
 
-Every 5 minutes auto-agent wakes up, builds a snapshot of your repo (git history, modified files, TODOs, open PRs, memory), checks how idle your machine is to determine autonomy level, and sends that context to Groq. The model responds with either `SLEEP` (nothing useful to say) or `ACTION: <instruction>`. If it's an action, auto-agent logs it, deduplicates it against today's history, and delivers it — as a desktop notification if you're away, or a single dim line in your terminal if you're present. At midnight it runs an autodream: the day's observations get merged into `MEMORY.md` by the LLM, keeping the file under 200 lines.
+Every 5 minutes auto-agent wakes up, builds a snapshot of your repo (git history, modified files across 10 language extensions, TODOs, open PRs, memory topics), checks how idle your machine is to determine autonomy level, and sends that context to Groq. The model responds with `SLEEP`, `ACTION: <instruction>`, or `COMMENT: <pr>: <message>`. Actions are logged and deduplicated per day. Delivery scales with autonomy — desktop notification if you're away, a quiet terminal line if you're present, nothing if you're low autonomy and it wants to post a PR comment. At midnight AutoDream runs: the day's log gets consolidated by the LLM into per-topic memory files that persist across sessions.
 
 ## Quickstart
 
@@ -33,8 +98,12 @@ python3 main.py
 | `GITHUB_TOKEN` | Yes | Personal access token with `repo` scope |
 | `GITHUB_REPO` | Yes | Repo to watch, e.g. `username/repo` |
 | `GROQ_API_KEY` | Yes | From [console.groq.com](https://console.groq.com) — free tier works |
-| `AGENT_REPO_PATH` | Yes | Absolute path to the local repo, e.g. `/Users/you/projects/myrepo` |
+| `GOOGLE_AI_STUDIO_KEY` | Yes | From [aistudio.google.com](https://aistudio.google.com) |
+| `KAIROS_REPO_PATH` | Yes | Absolute path to the local repo, e.g. `/Users/you/projects/myrepo` |
 | `OLLAMA_BASE_URL` | No | Defaults to `http://localhost:11434` |
+| `GITHUB_WEBHOOK_SECRET` | No | Secret for GitHub webhook HMAC verification |
+| `NGROK_AUTHTOKEN` | No | Enables real-time webhook tunnel via ngrok |
+| `DEMO_MODE` | No | `true` = 1-min ticks, 10s idle threshold, verbose output |
 
 ## Stack
 
@@ -42,9 +111,14 @@ python3 main.py
 |-------|-----------|
 | Language | Python 3.10+ |
 | Scheduler | APScheduler (AsyncIO) |
-| LLM | Groq — `llama-3.3-70b-versatile` |
+| File watcher | watchfiles |
+| LLM (tick) | Groq — `llama-3.3-70b-versatile` |
+| LLM (dream) | Google AI Studio / Gemini |
 | Local models | Ollama — `gemma4:e2b` |
 | GitHub | PyGithub |
+| Database | SQLite via sqlite-utils |
+| Dashboard | FastAPI + uvicorn |
+| Webhook tunnel | pyngrok |
 | Terminal output | rich |
 | Desktop notifications | plyer |
 
