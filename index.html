@@ -369,7 +369,7 @@
       <div class="nav-links">
         <a href="#how-it-works">How it works</a>
         <a href="#setup">Setup</a>
-        <a href="https://github.com/nandanadileep/Kairos-mini" target="_blank">GitHub</a>
+        <a href="https://github.com/nandanadileep/auto-agent" target="_blank">GitHub</a>
       </div>
     </nav>
 
@@ -380,7 +380,7 @@
       <p>auto-agent watches your codebase while you work. It finds TODOs, flags stale PRs, and posts comments — without interrupting your flow.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="#setup">Get started</a>
-        <a class="btn btn-ghost" href="https://github.com/nandanadileep/Kairos-mini" target="_blank">View on GitHub</a>
+        <a class="btn btn-ghost" href="https://github.com/nandanadileep/auto-agent" target="_blank">View on GitHub</a>
       </div>
 
       <div class="terminal">
@@ -392,12 +392,13 @@
         </div>
         <div class="terminal-body">
           <div class="t-dim">$ python3 main.py</div>
-          <div class="t-dim">auto-agent starting...</div>
+          <div class="t-dim">auto dream dashboard → http://localhost:8000</div>
           <div class="t-dim">auto-agent running. Press Ctrl+C to stop.</div>
           <div>&nbsp;</div>
-          <div><span class="t-dim">auto-agent</span> <span>3 unresolved TODOs in agent/tools.py</span></div>
-          <div><span class="t-dim">auto-agent</span> <span class="t-green">commented on PR #4 — stale for 6 days</span></div>
-          <div><span class="t-dim">auto-agent</span> <span class="t-accent">ACTION: add error handling to tools.py</span></div>
+          <div><span class="t-dim">autonomy: high · todos: 4 · modified: 3 · dangling: 1</span></div>
+          <div><span class="t-dim">auto-agent</span> <span class="t-yellow">PR #4 — stale for 6 days, no review</span></div>
+          <div><span class="t-dim">auto-agent</span> <span class="t-green">commented on PR #4</span></div>
+          <div><span class="t-dim">auto-agent</span> <span class="t-accent">utils/cache.py created but never imported</span></div>
         </div>
       </div>
     </div>
@@ -412,33 +413,43 @@
       <div class="features">
         <div class="feature">
           <div class="feature-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
-          <h3>Repo awareness</h3>
-          <p>Reads git history, modified files, TODOs, FIXMEs, HACKs, and missing env keys on every tick.</p>
+          <h3>Deep repo awareness</h3>
+          <p>Scans git history, TODOs/FIXMEs/HACKs, dangling imports, never-imported files, and missing env keys across 10 languages — Python, JS, TS, Go, Rust, Java, and more.</p>
         </div>
         <div class="feature">
           <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
           <h3>Presence detection</h3>
-          <p>Detects if you're at your Mac via idle time. Loud when you're away, quiet when you're present.</p>
+          <p>Reads system idle time on Mac, Windows, and Linux. Sends a desktop notification when you're away, a quiet terminal line when you're present.</p>
         </div>
         <div class="feature">
           <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
           <h3>Autonomous PR comments</h3>
-          <p>Finds something relevant to an open PR? It posts a comment autonomously, prefixed with <code>auto-agent:</code>.</p>
+          <p>Monitors open PRs for staleness, missing reviews, and conflicts. Posts comments autonomously when autonomy is high — once per PR per day, never spammy.</p>
         </div>
         <div class="feature">
-          <div class="feature-icon"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
-          <h3>Persistent memory</h3>
-          <p>Every night consolidates observations into a rolling MEMORY.md so it gets smarter over time.</p>
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+          <h3>AutoDream</h3>
+          <p>Every night at midnight, the day's observations are consolidated by an LLM into per-topic memory files. Context persists and improves across sessions.</p>
         </div>
         <div class="feature">
-          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-          <h3>Desktop notifications</h3>
-          <p>Step away for 5 minutes? You'll get a native Mac notification with whatever it found.</p>
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+          <h3>Live dashboard</h3>
+          <p>FastAPI dashboard at localhost:8000 shows autonomy level, action feed, open PRs, memory topics, and today's log. Light and dark mode. Approve PRs and trigger ticks from the browser.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <h3>Real-time webhooks</h3>
+          <p>Connects to GitHub via ngrok on startup and registers a webhook — so PR opens, pushes, and reviews trigger an immediate tick instead of waiting up to 5 minutes.</p>
         </div>
         <div class="feature">
           <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="12" x2="15" y2="12"/></svg></div>
           <h3>Never duplicates</h3>
-          <p>Logs every action to SQLite. Won't surface the same nudge twice in a day.</p>
+          <p>Every action is logged to SQLite and deduplicated per day. The same observation won't surface twice.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+          <h3>Demo mode</h3>
+          <p>Set <code>DEMO_MODE=true</code> to switch to 1-minute ticks, 10-second idle threshold, and verbose output — so you can see everything firing in real time.</p>
         </div>
       </div>
     </section>
@@ -455,8 +466,8 @@
           <div class="step-num">1</div>
           <div class="step-content">
             <h3>Clone and install</h3>
-            <pre>git clone https://github.com/nandanadileep/Kairos-mini.git
-cd Kairos-mini
+            <pre>git clone https://github.com/nandanadileep/auto-agent.git
+cd auto-agent
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt</pre>
           </div>
@@ -474,9 +485,12 @@ pip install -r requirements.txt</pre>
                   <tr><td>GITHUB_TOKEN</td><td><span class="req">required</span></td><td>Personal access token with <code>repo</code> scope</td></tr>
                   <tr><td>GITHUB_REPO</td><td><span class="req">required</span></td><td>Repo to watch, e.g. <code>username/repo</code></td></tr>
                   <tr><td>GROQ_API_KEY</td><td><span class="req">required</span></td><td>From console.groq.com — free tier works</td></tr>
-                  <tr><td>GOOGLE_AI_STUDIO_KEY</td><td><span class="req">required</span></td><td>From aistudio.google.com — for tick model</td></tr>
-                  <tr><td>auto-agent_REPO_PATH</td><td><span class="req">required</span></td><td>Absolute path to your local repo</td></tr>
+                  <tr><td>GOOGLE_AI_STUDIO_KEY</td><td><span class="req">required</span></td><td>From aistudio.google.com — used for AutoDream</td></tr>
+                  <tr><td>KAIROS_REPO_PATH</td><td><span class="req">required</span></td><td>Absolute path to your local repo</td></tr>
                   <tr><td>OLLAMA_BASE_URL</td><td><span class="opt">optional</span></td><td>Defaults to <code>http://localhost:11434</code></td></tr>
+                  <tr><td>GITHUB_WEBHOOK_SECRET</td><td><span class="opt">optional</span></td><td>Secret for webhook HMAC verification</td></tr>
+                  <tr><td>NGROK_AUTHTOKEN</td><td><span class="opt">optional</span></td><td>Enables real-time GitHub webhook tunnel via ngrok</td></tr>
+                  <tr><td>DEMO_MODE</td><td><span class="opt">optional</span></td><td>Set to <code>true</code> for 1-min ticks and verbose output</td></tr>
                 </tbody>
               </table>
             </div>
@@ -487,7 +501,7 @@ pip install -r requirements.txt</pre>
           <div class="step-content">
             <h3>Run</h3>
             <pre>python3 main.py</pre>
-            <p>auto-agent starts silently. It prints a line only when it has something useful to say.</p>
+            <p>Dashboard opens at <code>http://localhost:8000</code>. auto-agent runs silently in the background — a line prints only when it has something to say.</p>
           </div>
         </div>
       </div>
@@ -501,11 +515,15 @@ pip install -r requirements.txt</pre>
       <h2>Built with</h2>
       <div class="stack-grid">
         <span class="tag">Python 3.10+</span>
+        <span class="tag">FastAPI</span>
+        <span class="tag">uvicorn</span>
         <span class="tag">APScheduler</span>
+        <span class="tag">watchfiles</span>
         <span class="tag">litellm</span>
         <span class="tag">Groq — llama-3.3-70b</span>
-        <span class="tag">Google AI Studio — gemma-3n-e2b</span>
+        <span class="tag">Google AI Studio</span>
         <span class="tag">PyGithub</span>
+        <span class="tag">pyngrok</span>
         <span class="tag">rich</span>
         <span class="tag">plyer</span>
         <span class="tag">sqlite-utils</span>
@@ -518,7 +536,7 @@ pip install -r requirements.txt</pre>
     </section>
 
     <footer>
-      <p>MIT License · 2026 · Nandana Dileep · <a href="https://github.com/nandanadileep/Kairos-mini" target="_blank">GitHub</a></p>
+      <p>MIT License · 2026 · Nandana Dileep · <a href="https://github.com/nandanadileep/auto-agent" target="_blank">GitHub</a></p>
     </footer>
 
   </div>
