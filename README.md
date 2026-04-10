@@ -2,6 +2,8 @@
 
 Open-source autonomous background coding agent — inspired by Anthropic's unreleased KAIROS, built with Gemma 4 and Groq.
 
+![auto dream dashboard](assets/dashboard.png)
+
 ---
 
 ## What it does
