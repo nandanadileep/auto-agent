@@ -437,11 +437,6 @@
           <p>FastAPI dashboard at localhost:8000 shows autonomy level, action feed, open PRs, memory topics, and today's log. Light and dark mode. Approve PRs and trigger ticks from the browser.</p>
         </div>
         <div class="feature">
-          <div class="feature-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-          <h3>Real-time webhooks</h3>
-          <p>Connects to GitHub via ngrok on startup and registers a webhook — so PR opens, pushes, and reviews trigger an immediate tick instead of waiting up to 5 minutes.</p>
-        </div>
-        <div class="feature">
           <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="12" x2="15" y2="12"/></svg></div>
           <h3>Never duplicates</h3>
           <p>Every action is logged to SQLite and deduplicated per day. The same observation won't surface twice.</p>
