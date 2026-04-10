@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auto-agent — silent background coding agent</title>
+  <title>auto-agent: silent background coding agent</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -377,7 +377,7 @@
     <div class="hero">
       <div class="badge">open source · autonomous · background agent</div>
       <h1>Your repo has a<br/><span class="grad">silent co-pilot</span></h1>
-      <p>auto-agent watches your codebase while you work. It finds TODOs, flags stale PRs, and posts comments — without interrupting your flow.</p>
+      <p>auto-agent watches your codebase while you work. It finds TODOs, flags stale PRs, and posts comments, without interrupting your flow.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="#setup">Get started</a>
         <a class="btn btn-ghost" href="https://github.com/nandanadileep/auto-agent" target="_blank">View on GitHub</a>
@@ -396,7 +396,7 @@
           <div class="t-dim">auto-agent running. Press Ctrl+C to stop.</div>
           <div>&nbsp;</div>
           <div><span class="t-dim">autonomy: high · todos: 4 · modified: 3 · dangling: 1</span></div>
-          <div><span class="t-dim">auto-agent</span> <span class="t-yellow">PR #4 — stale for 6 days, no review</span></div>
+          <div><span class="t-dim">auto-agent</span> <span class="t-yellow">PR #4: stale for 6 days, no review</span></div>
           <div><span class="t-dim">auto-agent</span> <span class="t-green">commented on PR #4</span></div>
           <div><span class="t-dim">auto-agent</span> <span class="t-accent">utils/cache.py created but never imported</span></div>
         </div>
@@ -414,7 +414,7 @@
         <div class="feature">
           <div class="feature-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
           <h3>Deep repo awareness</h3>
-          <p>Scans git history, TODOs/FIXMEs/HACKs, dangling imports, never-imported files, and missing env keys across 10 languages — Python, JS, TS, Go, Rust, Java, and more.</p>
+          <p>Scans git history, TODOs/FIXMEs/HACKs, dangling imports, never-imported files, and missing env keys across 10 languages: Python, JS, TS, Go, Rust, Java, and more.</p>
         </div>
         <div class="feature">
           <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
@@ -424,7 +424,7 @@
         <div class="feature">
           <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
           <h3>Autonomous PR comments</h3>
-          <p>Monitors open PRs for staleness, missing reviews, and conflicts. Posts comments autonomously when autonomy is high — once per PR per day, never spammy.</p>
+          <p>Monitors open PRs for staleness, missing reviews, and conflicts. Posts comments autonomously when autonomy is high, once per PR per day, never spammy.</p>
         </div>
         <div class="feature">
           <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
@@ -474,8 +474,8 @@ pip install -r requirements.txt</pre>
                 <tbody>
                   <tr><td>GITHUB_TOKEN</td><td><span class="req">required</span></td><td>Personal access token with <code>repo</code> scope</td></tr>
                   <tr><td>GITHUB_REPO</td><td><span class="req">required</span></td><td>Repo to watch, e.g. <code>username/repo</code></td></tr>
-                  <tr><td>GROQ_API_KEY</td><td><span class="req">required</span></td><td>From console.groq.com — free tier works</td></tr>
-                  <tr><td>GOOGLE_AI_STUDIO_KEY</td><td><span class="req">required</span></td><td>From aistudio.google.com — used for AutoDream</td></tr>
+                  <tr><td>GROQ_API_KEY</td><td><span class="req">required</span></td><td>From console.groq.com, free tier works</td></tr>
+                  <tr><td>GOOGLE_AI_STUDIO_KEY</td><td><span class="req">required</span></td><td>From aistudio.google.com, used for AutoDream</td></tr>
                   <tr><td>KAIROS_REPO_PATH</td><td><span class="req">required</span></td><td>Absolute path to your local repo</td></tr>
                   <tr><td>OLLAMA_BASE_URL</td><td><span class="opt">optional</span></td><td>Defaults to <code>http://localhost:11434</code></td></tr>
                   <tr><td>GITHUB_WEBHOOK_SECRET</td><td><span class="opt">optional</span></td><td>Secret for webhook HMAC verification</td></tr>
@@ -491,7 +491,7 @@ pip install -r requirements.txt</pre>
           <div class="step-content">
             <h3>Run</h3>
             <pre>python3 main.py</pre>
-            <p>Dashboard opens at <code>http://localhost:8000</code>. auto-agent runs silently in the background — a line prints only when it has something to say.</p>
+            <p>Dashboard opens at <code>http://localhost:8000</code>. auto-agent runs silently in the background. A line prints only when it has something to say.</p>
           </div>
         </div>
       </div>
@@ -510,7 +510,7 @@ pip install -r requirements.txt</pre>
         <span class="tag">APScheduler</span>
         <span class="tag">watchfiles</span>
         <span class="tag">litellm</span>
-        <span class="tag">Groq — llama-3.3-70b</span>
+        <span class="tag">Groq llama-3.3-70b</span>
         <span class="tag">Google AI Studio</span>
         <span class="tag">PyGithub</span>
         <span class="tag">pyngrok</span>
