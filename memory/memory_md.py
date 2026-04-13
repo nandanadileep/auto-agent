@@ -2,12 +2,29 @@ from pathlib import Path
 
 from config import MEMORY_MD_PATH
 
-TOPICS_DIR = Path(MEMORY_MD_PATH).parent / "topics"
+_BASE_MEMORY_DIR = Path(MEMORY_MD_PATH).parent
+
+
+def _project_dir() -> Path:
+    try:
+        from state import get_active_project
+        name = get_active_project().get("name", "default")
+    except Exception:
+        name = "default"
+    return _BASE_MEMORY_DIR / "projects" / name
+
+
+def _topics_dir() -> Path:
+    return _project_dir() / "topics"
+
+
+def _memory_md_path() -> Path:
+    return _project_dir() / "MEMORY.md"
 
 
 def read_memory_md() -> str:
     try:
-        path = Path(MEMORY_MD_PATH)
+        path = _memory_md_path()
         if not path.exists():
             return ""
         return path.read_text()
@@ -17,7 +34,7 @@ def read_memory_md() -> str:
 
 def write_memory_md(content: str):
     try:
-        path = Path(MEMORY_MD_PATH)
+        path = _memory_md_path()
         path.parent.mkdir(parents=True, exist_ok=True)
         lines = content.splitlines()
         if len(lines) > 200:
@@ -30,7 +47,7 @@ def write_memory_md(content: str):
 
 def read_topic(topic: str) -> str:
     try:
-        path = TOPICS_DIR / f"{topic}.md"
+        path = _topics_dir() / f"{topic}.md"
         if not path.exists():
             return ""
         return path.read_text()
@@ -40,8 +57,9 @@ def read_topic(topic: str) -> str:
 
 def write_topic(topic: str, content: str):
     try:
-        TOPICS_DIR.mkdir(parents=True, exist_ok=True)
-        path = TOPICS_DIR / f"{topic}.md"
+        td = _topics_dir()
+        td.mkdir(parents=True, exist_ok=True)
+        path = td / f"{topic}.md"
         lines = content.splitlines()
         if len(lines) > 100:
             content = "\n".join(lines[:100])
@@ -53,9 +71,10 @@ def write_topic(topic: str, content: str):
 
 def list_topics() -> list:
     try:
-        if not TOPICS_DIR.exists():
+        td = _topics_dir()
+        if not td.exists():
             return []
-        return [p.stem for p in TOPICS_DIR.glob("*.md")]
+        return [p.stem for p in td.glob("*.md")]
     except Exception:
         return []
 

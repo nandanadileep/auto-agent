@@ -4,8 +4,17 @@ from pathlib import Path
 from config import DAILY_LOG_DIR
 
 
+def _project_log_dir() -> Path:
+    try:
+        from state import get_active_project
+        name = get_active_project().get("name", "default")
+    except Exception:
+        name = "default"
+    return Path(DAILY_LOG_DIR) / name
+
+
 def _log_path(now: datetime) -> Path:
-    return Path(DAILY_LOG_DIR) / str(now.year) / f"{now.month:02d}" / f"{now.date().isoformat()}.md"
+    return _project_log_dir() / str(now.year) / f"{now.month:02d}" / f"{now.date().isoformat()}.md"
 
 
 def write_to_daily_log(observation: str):

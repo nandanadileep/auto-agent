@@ -1,5 +1,17 @@
 import asyncio
 import sys
+try:
+    from utils import deleted_module  # demo: dangling import
+except ImportError:
+    pass
+try:
+    from utils import deleted_module  # demo: dangling import
+except ImportError:
+    pass
+try:
+    from utils import deleted_module  # demo: dangling import
+except ImportError:
+    pass
 import threading
 import time
 

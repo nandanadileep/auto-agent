@@ -6,8 +6,9 @@ from pathlib import Path
 import tiktoken
 from git import Repo, InvalidGitRepositoryError
 
-from config import KAIROS_REPO_PATH, MAX_CONTEXT_TOKENS, MEMORY_MD_PATH, WATCHED_EXTENSIONS
+from config import MAX_CONTEXT_TOKENS, MEMORY_MD_PATH, WATCHED_EXTENSIONS
 from memory.memory_md import read_all_topics, read_memory_md
+from state import get_active_project
 
 SKIP_DIRS = {"node_modules", "__pycache__", ".git", ".venv", "dist", "build", ".next"}
 
@@ -19,7 +20,7 @@ def _count_tokens(text: str) -> int:
 
 def _git_section(max_commits: int = 10) -> dict:
     try:
-        repo = Repo(KAIROS_REPO_PATH)
+        repo = Repo(get_active_project().get("repo_path", ""))
         commits = list(repo.iter_commits(max_count=max_commits))
         history = [
             {
@@ -42,7 +43,7 @@ def _git_section(max_commits: int = 10) -> dict:
 
 def _filesystem_section() -> dict:
     try:
-        root = Path(KAIROS_REPO_PATH)
+        root = Path(get_active_project().get("repo_path", ""))
         cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
         ext_set = set(WATCHED_EXTENSIONS)
 
@@ -105,7 +106,7 @@ def _filesystem_section() -> dict:
 
 def _project_structure_section() -> dict:
     try:
-        root = Path(KAIROS_REPO_PATH)
+        root = Path(get_active_project().get("repo_path", ""))
 
         readme_exists = (root / "README.md").exists()
 
@@ -150,7 +151,7 @@ def _project_structure_section() -> dict:
 def _dangling_imports_section() -> list:
     import re as _re
     try:
-        root = Path(KAIROS_REPO_PATH)
+        root = Path(get_active_project().get("repo_path", ""))
         dangling = []
         seen: set[tuple[str, str]] = set()
 
@@ -240,7 +241,7 @@ def _dangling_imports_section() -> list:
 
 def _never_imported_section() -> list:
     try:
-        root = Path(KAIROS_REPO_PATH)
+        root = Path(get_active_project().get("repo_path", ""))
         ENTRY_POINTS = {"main.py", "config.py", "setup.py", "conftest.py", "demo.py", "run_tests.py"}
         JS_TS_EXTS = {".js", ".ts", ".tsx", ".jsx"}
         JS_TS_ENTRY_STEMS = {"index", "main", "app", "server", "vite.config", "next.config",

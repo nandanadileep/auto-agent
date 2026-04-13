@@ -441,6 +441,11 @@
           <h3>Never duplicates</h3>
           <p>Every action is logged to SQLite and deduplicated per day. The same observation won't surface twice.</p>
         </div>
+        <div class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><circle cx="7" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="17" cy="10" r="1" fill="currentColor" stroke="none"/></svg></div>
+          <h3>Multi-project support</h3>
+          <p>Watch multiple repos from a single agent. Switch the active project from a dropdown in the dashboard, no restart required. Add projects by entering a GitHub repo and local path directly in the UI.</p>
+        </div>
       </div>
     </section>
 
@@ -473,10 +478,9 @@ pip install -r requirements.txt</pre>
                 <thead><tr><th>Key</th><th></th><th>Description</th></tr></thead>
                 <tbody>
                   <tr><td>GITHUB_TOKEN</td><td><span class="req">required</span></td><td>Personal access token with <code>repo</code> scope</td></tr>
-                  <tr><td>GITHUB_REPO</td><td><span class="req">required</span></td><td>Repo to watch, e.g. <code>username/repo</code></td></tr>
+                  <tr><td>GITHUB_REPO</td><td><span class="req">required</span></td><td>Default repo for webhook setup, e.g. <code>username/repo</code></td></tr>
                   <tr><td>GROQ_API_KEY</td><td><span class="req">required</span></td><td>From console.groq.com, free tier works</td></tr>
                   <tr><td>GOOGLE_AI_STUDIO_KEY</td><td><span class="req">required</span></td><td>From aistudio.google.com, used for AutoDream</td></tr>
-                  <tr><td>KAIROS_REPO_PATH</td><td><span class="req">required</span></td><td>Absolute path to your local repo</td></tr>
                   <tr><td>OLLAMA_BASE_URL</td><td><span class="opt">optional</span></td><td>Defaults to <code>http://localhost:11434</code></td></tr>
                   <tr><td>GITHUB_WEBHOOK_SECRET</td><td><span class="opt">optional</span></td><td>Secret for webhook HMAC verification</td></tr>
                   <tr><td>NGROK_AUTHTOKEN</td><td><span class="opt">optional</span></td><td>Enables real-time GitHub webhook tunnel via ngrok</td></tr>
@@ -488,6 +492,13 @@ pip install -r requirements.txt</pre>
         </div>
         <div class="step">
           <div class="step-num">3</div>
+          <div class="step-content">
+            <h3>Add your projects</h3>
+            <p>Open the dashboard at <code>http://localhost:8000</code> after starting. Click the project selector in the top-right corner and choose <strong>+ add project</strong>. Enter a name, your GitHub repo (<code>username/repo</code>), and the absolute local path. Projects are saved to <code>projects.json</code> and you can switch between them instantly without restarting.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
           <div class="step-content">
             <h3>Run</h3>
             <pre>python3 main.py</pre>

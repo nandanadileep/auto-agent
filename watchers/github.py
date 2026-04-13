@@ -2,11 +2,13 @@ from datetime import datetime, timezone
 
 from github import Github
 
-from config import GITHUB_REPO, GITHUB_TOKEN
+from config import GITHUB_TOKEN
+from state import get_active_project
 
 
 def _gh_repo():
-    return Github(GITHUB_TOKEN).get_repo(GITHUB_REPO)
+    github_repo = get_active_project().get("github_repo", "")
+    return Github(GITHUB_TOKEN).get_repo(github_repo)
 
 
 async def get_open_prs() -> list:

@@ -1,4 +1,6 @@
 import asyncio
+import hashlib
+import json
 
 from rich.console import Console
 
@@ -6,9 +8,27 @@ import config
 from actions import notify, post_pr_comment, print_brief
 from agent.llm import ask_tick_model
 from context import build_context
+from memory.daily_log import write_to_daily_log
 from presence import get_autonomy_level
-from state import already_notified_today, log_action, log_last_tick
+from state import already_notified_today, get_context_hash, log_action, log_last_tick, set_context_hash
 from watchers.github import get_open_prs
+
+
+def _compute_context_hash(ctx: dict, open_prs: list) -> str:
+    git_history = ctx.get("git", {}).get("history", [])
+    latest_commit = git_history[0].get("message", "") if git_history else ""
+    stable = {
+        "latest_commit": latest_commit,
+        "prs": sorted(
+            [(p["number"], p["review_status"], p["is_stale"]) for p in open_prs]
+        ),
+        "todos": ctx.get("filesystem", {}).get("todos", []),
+        "never_imported": sorted(ctx.get("never_imported", [])),
+        "dangling_imports": sorted(
+            f"{d['file']}:{d['import']}" for d in ctx.get("dangling_imports", [])
+        ),
+    }
+    return hashlib.md5(json.dumps(stable, sort_keys=True).encode()).hexdigest()
 
 console = Console()
 
@@ -20,6 +40,13 @@ async def tick():
             ctx = await build_context()
             autonomy = get_autonomy_level()
             open_prs = await get_open_prs()
+
+            ctx_hash = _compute_context_hash(ctx, open_prs)
+            if ctx_hash == get_context_hash():
+                if config.VERBOSE_TICKS:
+                    console.print("[dim]no changes detected · skipping LLM[/dim]")
+                return
+            set_context_hash(ctx_hash)
 
             pr_summary = ""
             if open_prs:
@@ -43,20 +70,25 @@ async def tick():
 
             response = await ask_tick_model(prompt)
 
-            if config.VERBOSE_TICKS:
-                fs = ctx.get('filesystem', {})
-                modified = fs.get('modified_files_last_24h', {})
-                total_modified = sum(len(v) for v in modified.values())
-                console.print(f"[dim]autonomy: {autonomy} · todos: {len(fs.get('todos', []))} · modified: {total_modified} · never_imported: {ctx.get('never_imported', [])} · dangling: {ctx.get('dangling_imports', [])} · response: {response}[/dim]")
-
             if not response or response.startswith("SLEEP"):
+                if config.VERBOSE_TICKS:
+                    fs = ctx.get('filesystem', {})
+                    modified = fs.get('modified_files_last_24h', {})
+                    total_modified = sum(len(v) for v in modified.values())
+                    console.print(f"[dim]autonomy: {autonomy} · todos: {len(fs.get('todos', []))} · modified: {total_modified} · never_imported: {ctx.get('never_imported', [])} · dangling: {ctx.get('dangling_imports', [])} · SLEEP[/dim]")
                 return
 
             if response.startswith("ACTION:"):
                 instruction = response[len("ACTION:"):].strip()
-                log_action(instruction)
                 if already_notified_today(instruction):
                     return
+                log_action(instruction)
+                write_to_daily_log(instruction)
+                if config.VERBOSE_TICKS:
+                    fs = ctx.get('filesystem', {})
+                    modified = fs.get('modified_files_last_24h', {})
+                    total_modified = sum(len(v) for v in modified.values())
+                    console.print(f"[dim]autonomy: {autonomy} · todos: {len(fs.get('todos', []))} · modified: {total_modified} · {response}[/dim]")
                 if autonomy == "high":
                     notify(instruction)
                 else:
@@ -72,13 +104,19 @@ async def tick():
                         dedup_key = f"comment:pr#{pr_number}"
                         if already_notified_today(dedup_key):
                             return
+                        if config.VERBOSE_TICKS:
+                            fs = ctx.get('filesystem', {})
+                            modified = fs.get('modified_files_last_24h', {})
+                            total_modified = sum(len(v) for v in modified.values())
+                            console.print(f"[dim]autonomy: {autonomy} · todos: {len(fs.get('todos', []))} · modified: {total_modified} · {response}[/dim]")
                         if autonomy == "low":
                             log_action(dedup_key, pr_id=pr_number)
-                            print_brief("wants to post a PR comment — step away or approve manually")
+                            print_brief("wants to post a PR comment, step away or approve manually")
                             return
                         ok = post_pr_comment(pr_number, message)
                         if ok:
                             log_action(dedup_key, pr_id=pr_number)
+                            write_to_daily_log(f"commented on PR #{pr_number}: {message}")
                             print_brief(f"commented on PR #{pr_number}")
                     except ValueError:
                         pass
